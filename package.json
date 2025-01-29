@@ -33,6 +33,10 @@
 		"vitest": "^3.0.0"
 	},
 	"dependencies": {
-		"@supabase/supabase-js": "^2.48.1"
+		"@libsql/client": "^0.14.0",
+		"@popperjs/core": "^2.11.8",
+		"flowbite": "^3.0.0",
+		"flowbite-svelte": "^0.47.4",
+		"tailwind-merge": "^2.6.0"
 	}
 }

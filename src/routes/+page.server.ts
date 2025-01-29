@@ -1,9 +1,13 @@
-import { supabase } from '$lib/supabaseClient';
+import type { Handle } from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit';
 
-export async function load() {
-	const { data } = await supabase.from('users').select('id, name, email');
-	console.log(data);
-	return {
-		users: data ?? []
-	};
-}
+export const handle: Handle = async ({ event, resolve }) => {
+	const session = event.cookies.get('session'); // Get session cookie
+
+	// Redirect if user tries to access private routes without login
+	if (event.url.pathname.startsWith('/dashboard') && !session) {
+		throw redirect(303, '/login');
+	}
+
+	return resolve(event);
+};
