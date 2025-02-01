@@ -35,6 +35,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 			if (decodedUser) {
 				event.locals.user = decodedUser;
 			}
+		} else {
+			event.cookies.delete('refresh_token', { path: '/' });
 		}
 	}
 
