@@ -19,7 +19,7 @@ import { MailOpen } from "lucide-react";
 import { ButtonLoading } from "@/components/ui/buttonLoading";
 import { useToast } from "@/hooks/use-toast";
 import { GiPiggyBank } from "react-icons/gi";
-import { signInWithEmail } from "@/app/actions/login/auth";
+import { signInWithEmail } from "@/app/actions/auth";
 import { OtpForm } from "@/components/login/otp-form";
 
 const loginSchema = z.object({

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { verifyOtp } from "@/app/actions/login/auth";
+import { verifyOtp } from "@/app/actions/auth";
 import { Button } from "@/components/ui/button";
 import {
     Card,

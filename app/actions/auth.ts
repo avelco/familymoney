@@ -1,7 +1,7 @@
 // app/actions/auth.ts
 "use server";
 
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { cookies } from "next/headers";
 import { permanentRedirect, redirect } from "next/navigation";
 
