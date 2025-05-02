@@ -4,7 +4,7 @@ import type { Route } from "./+types/register";
 import { LoadingButton, SubmitButton } from "~/components/Buttons";
 import type { CreateUser, CreateUserErrors } from "~/interfaces/userInterface";
 import type { ActionData } from "~/interfaces/generalInterface";
-import { createUser } from "~/lib/db/user";
+import { createUser } from "~/lib/db/user.server";
 import bcrypt from "bcrypt";
 
 export async function action({ request }: Route.ActionArgs) {
@@ -123,12 +123,12 @@ export default function Register() {
 
 				<div className="text-center">
 					<p className="text-sm text-gray-600">
-						Already have an account?{" "}
+						Ya tienes una cuenta?{" "}
 						<a
 							href="/login"
 							className="font-medium text-blue-600 hover:text-blue-500"
 						>
-							Sign in
+							Iniciar sesión
 						</a>
 					</p>
 				</div>

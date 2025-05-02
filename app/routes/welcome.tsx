@@ -1,7 +1,7 @@
 
 import type { Route } from "../+types/root";
-import { data, redirect } from "react-router";
-import { getSession, commitSession } from "../sessions.server";
+import { redirect } from "react-router";
+import { getSession } from "../sessions.server";
 
 export async function loader({
     request,
@@ -9,7 +9,7 @@ export async function loader({
     const session = await getSession(
         request.headers.get("Cookie")
     );
-
+    console.log(session.has("userId"))
     if (session.has("userId")) {
         // Redirect to the home page if they are already signed in.
         return redirect("/home");

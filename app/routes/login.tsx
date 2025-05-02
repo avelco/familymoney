@@ -3,7 +3,9 @@ import { FcMoneyTransfer } from "react-icons/fc";
 import type { Route } from "./+types/login";
 import { commitSession, getSession } from "~/sessions.server";
 import { LoadingButton, SubmitButton } from "~/components/Buttons";
-
+import type { LoginErrors } from "~/interfaces/userInterface";
+import { getUserByEmail } from "~/lib/db/user.server";
+import bcrypt from "bcrypt";
 
 export async function loader({
     request,
@@ -28,13 +30,76 @@ export async function loader({
 
 export async function action({
     request,
-  }: Route.ActionArgs) {
+}: Route.ActionArgs) {
+    const session = await getSession(
+        request.headers.get("Cookie")
+    );
+
     let formData = await request.formData();
-    let email = formData.get("email");
-    let password = formData.get("password");    
-    console.log(email, password)
-    return { email, password };
-  }
+    let email = String(formData.get("email"));
+    let password = String(formData.get("password"));
+
+    const errors: LoginErrors = {};
+
+    if (!email.includes("@") || !email) {
+        errors.email = "Invalid email address";
+    }
+
+    if (!password || password.length < 6) {
+        errors.password =
+            "Password should be at least 6 characters";
+    }
+
+    const user = await getUserByEmail(email);
+
+    // --- Check User and Password ---
+    if (!user) {
+        // User not found - flash generic error and redirect
+        console.log(`Login attempt failed: User not found for email ${email}`);
+        session.flash("error", "Invalid email or password.");
+        return redirect("/login", {
+            headers: {
+                "Set-Cookie": await commitSession(session),
+            },
+        });
+    }
+
+    try {
+        // Use await with bcrypt.compare (no callback)
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+
+        if (isPasswordValid) {
+            // --- Login Success ---
+            console.log(`Login successful for user ID: ${user.id}`);
+            session.set("userId", String(user.id));
+            // Redirect to home page with session cookie
+            return redirect("/home", {
+                headers: {
+                    "Set-Cookie": await commitSession(session),
+                },
+            });
+        } else {
+            // --- Invalid Password ---
+            console.log(`Login attempt failed: Invalid password for user ID ${user.id}`);
+            session.flash("error", "Invalid email or password.");
+            return redirect("/login", {
+                headers: {
+                    "Set-Cookie": await commitSession(session),
+                },
+            });
+        }
+    } catch (compareError) {
+        // --- Handle bcrypt comparison errors ---
+        console.error("Error during password comparison:", compareError);
+        session.flash("error", "An error occurred during login. Please try again.");
+        return redirect("/login", {
+            headers: {
+                "Set-Cookie": await commitSession(session),
+            },
+        });
+    }
+
+}
 
 export default function Login() {
     const navigation = useNavigation();
@@ -44,11 +109,11 @@ export default function Login() {
             <div className="max-w-md w-full space-y-8">
                 <div>
                     <h2 className="mt-6 text-center text-3xl font-bold text-gray-900 flex items-center justify-center gap-2">
-                        <FcMoneyTransfer className="text-4xl" /> 
+                        <FcMoneyTransfer className="text-4xl" />
                         <span>Family Money</span>
                     </h2>
                 </div>
-                <Form method="post" className="mt-8 space-y-6" >
+                <Form method="post" className="mt-8 space-y-6" reloadDocument>
                     <div className="rounded-md shadow-sm -space-y-px">
                         <div>
                             <label htmlFor="email" className="sr-only">
@@ -92,7 +157,7 @@ export default function Login() {
                     </div>
 
                     <div>
-                    {navigation.formAction === "/login" ? (
+                        {navigation.formAction === "/login" ? (
                             <LoadingButton text="Validando" />
                         ) : (
                             <SubmitButton text="Iniciar sesión" />
@@ -115,4 +180,3 @@ export default function Login() {
         </div>
     );
 }
-

@@ -7,6 +7,12 @@ export default defineConfig({
   plugins: [tailwindcss(), reactRouter(), tsconfigPaths()],
   ssr: {
     noExternal: ["@prisma/client"],
-  },  
-  build: { target: 'esnext' },
+  },
+  build: { target: "esnext" },
+  optimizeDeps: {
+    exclude: [
+      "@mapbox/node-pre-gyp",
+      "sqlite3",
+    ],
+  },
 });

@@ -6,6 +6,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  // Ensure the output path is correct for your project structure
   output   = "../node_modules/@prisma-app/client"
 }
 
@@ -17,99 +18,81 @@ datasource db {
 
 model User {
   id        Int        @id @default(autoincrement())
-  name      String    
+  name      String
   email     String     @unique
-  password  String    
+  password  String
   isActive  Boolean    @default(false) @map("is_active")
   createdAt DateTime   @default(now()) @map("created_at")
-  updatedAt DateTime   @updatedAt  @map("updated_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
 
-  categories Category[]
-  accounts   Account[]
-  budgets    Budget[]
-  goals      Goal[]
+  transactions Transaction[]
+  allocations  Allocation[]
 
   @@map("users")
 }
 
-model Category {
-  id         Int           @id @default(autoincrement())
-  userId     Int           @map("user_id")
-  user       User          @relation(fields: [userId], references: [id])
-  name       String       
-  type       String        @default("expense")
-  createdAt  DateTime      @default(now())  @map("created_at")
-  updatedAt  DateTime      @updatedAt       @map("updated_at")
-
-  transactions Transaction[]
-  budgets      Budget[]
-
-  @@index([userId], name: "idx_categories_user_id")
-  @@map("categories")
-}
-
-model Account {
-  id         Int           @id @default(autoincrement())
-  userId     Int           @map("user_id")
-  user       User          @relation(fields: [userId], references: [id])
-  name       String       
-  type       String       
-  balance    Decimal       @default("0.00") 
-  currency   String        @default("USD")  
-  createdAt  DateTime      @default(now())    @map("created_at")
-  updatedAt  DateTime      @updatedAt         @map("updated_at")
-
-  transactions Transaction[]
-
-  @@index([userId], name: "idx_accounts_user_id")
-  @@map("accounts")
-}
-
-model Transaction {
-  id               Int        @id @default(autoincrement())
-  accountId        Int        @map("account_id")
-  account          Account    @relation(fields: [accountId], references: [id])
-  categoryId       Int        @map("category_id")
-  category         Category   @relation(fields: [categoryId], references: [id])
-  amount           Decimal    
-  transactionDate  DateTime   @default(now()) @map("transaction_date")
-  description      String?    
-  createdAt        DateTime   @default(now()) @map("created_at")
-  updatedAt        DateTime   @updatedAt      @map("updated_at")
-
-  @@index([accountId],  name: "idx_transactions_account_id")
-  @@index([categoryId], name: "idx_transactions_category_id")
-  @@map("transactions")
-}
-
 model Budget {
-  id         Int        @id @default(autoincrement())
-  userId     Int        @map("user_id")
-  user       User       @relation(fields: [userId], references: [id])
-  categoryId Int?       @map("category_id")
-  category   Category?  @relation(fields: [categoryId], references: [id])
-  amount     Decimal    
-  startDate  DateTime   @map("start_date")
-  endDate    DateTime?  @map("end_date")
-  createdAt  DateTime   @default(now()) @map("created_at")
-  updatedAt  DateTime   @updatedAt      @map("updated_at")
+  id          Int         @id @default(autoincrement())
+  name        String
+  startDate   DateTime    @map("start_date")
+  endDate     DateTime    @map("end_date")
+  allocations Allocation[]
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
 
-  @@index([userId],     name: "idx_budgets_user_id")
-  @@index([categoryId], name: "idx_budgets_category_id")
   @@map("budgets")
 }
 
-model Goal {
-  id            Int       @id @default(autoincrement())
-  userId        Int       @map("user_id")
-  user          User      @relation(fields: [userId], references: [id])
-  name          String   
-  targetAmount  Decimal   @map("target_amount")
-  currentAmount Decimal   @default("0.00") @map("current_amount")
-  deadline      DateTime? @map("deadline")
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt      @map("updated_at")
+model Allocation {
+  id           Int         @id @default(autoincrement())
+  amount       Float
+  budget       Budget      @relation(fields: [budgetId], references: [id])
+  budgetId     Int         @map("budget_id")
+  transactions Transaction[]
+  user         User        @relation(fields: [userId], references: [id])
+  userId       Int         @map("user_id")
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @updatedAt @map("updated_at")
 
-  @@index([userId], name: "idx_goals_user_id")
-  @@map("goals")
+  @@map("allocations")
+}
+
+model Transaction {
+  id           Int        @id @default(autoincrement())
+  amount       Float
+  date         DateTime   @default(now())
+  allocation   Allocation @relation(fields: [allocationId], references: [id])
+  allocationId Int        @map("allocation_id")
+  user         User       @relation(fields: [userId], references: [id])
+  userId       Int        @map("user_id")
+  account      Account    @relation(fields: [accountId], references: [id])
+  accountId    Int        @map("account_id")
+  wallet       Wallet     @relation(fields: [walletId], references: [id])
+  walletId     Int        @map("wallet_id")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+
+  @@map("transactions")
+}
+
+model Account {
+  id           Int           @id @default(autoincrement())
+  name         String
+  balance      Float
+  transactions Transaction[]
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+
+  @@map("accounts")
+}
+
+model Wallet {
+  id           Int           @id @default(autoincrement())
+  name         String
+  balance      Float
+  transactions Transaction[]
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+
+  @@map("wallets")
 }
