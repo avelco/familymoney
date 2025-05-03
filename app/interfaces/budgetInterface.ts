@@ -40,6 +40,12 @@ export type AllocationFormData = {
 	id?: number;
 };
 
+export type AllocationUpdateFormData = {
+	amount: number;
+	name: string;
+	id?: number;
+};
+
 export interface User {
 	id: number;
 	name: string;

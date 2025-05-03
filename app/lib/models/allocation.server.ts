@@ -1,4 +1,4 @@
-import type { AllocationFormData } from "~/interfaces/budgetInterface";
+import type { AllocationFormData, AllocationUpdateFormData } from "~/interfaces/budgetInterface";
 import { db } from "../db/db.server";
 
 export const getAllocationByBudgetId = async (budgetId: number) => {
@@ -44,14 +44,13 @@ export const createAllocation = async (allocation: AllocationFormData) => {
 
 export const updateAllocation = async (
   allocationId: number,
-  allocation: AllocationFormData
+  allocation: AllocationUpdateFormData
 ) => {
   return db.allocation.update({
     where: { id: Number(allocationId) },
     data: {
       amount: allocation.amount,
-      budgetId: allocation.budgetId,
-      userId: allocation.userId,
+      name: allocation.name,
     },
   });
 };

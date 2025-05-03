@@ -7,9 +7,9 @@ import AllocationModal from "~/features/allocation/components/AllocationModal";
 import type { Allocation } from "~/interfaces/budgetInterface";
 import type { Route } from "../+types/root";
 import { getAllocationByBudgetId } from "~/lib/models/allocation.server";
-import { redirect, useActionData, useLoaderData, useNavigation, useParams } from "react-router";
+import { redirect, useActionData, useLoaderData, useNavigation, useParams, useRevalidator } from "react-router";
 import { getSession } from "~/sessions.server";
-import { createAllocationAction, deleteAllocationAction } from "~/features/allocation/allocationActions";
+import { createAllocationAction, deleteAllocationAction, updateAllocationAction } from "~/features/allocation/allocationActions";
 import { existBudget } from "~/lib/models/budget.server";
 import toast from "react-hot-toast";
 
@@ -38,7 +38,7 @@ export async function action({
 	const actionType = formData.get("_action");
 	formData.set("budgetId", String(budgetId));
 	formData.set("userId", String(session.get("userId")));
-	console.log(formData);
+
 	if (actionType === "create") {
 		const result = await createAllocationAction(formData);
 		if (result.errors) {
@@ -51,6 +51,14 @@ export async function action({
 			return result;
 		}
 		return { success: "Asignación eliminada correctamente" };
+	} else if (actionType === "update") {
+		const result = await updateAllocationAction(formData);
+		if (result?.errors) {
+			return result;
+		}
+		return { success: "Asignación actualizada correctamente" };
+	} else {
+		return { errors: { _action: "Acción no reconocida" } };
 	}
 }
 
@@ -58,68 +66,49 @@ const Allocation: React.FC = () => {
 	const actionData = useActionData();
 	const data = useLoaderData() as Allocation[];
 	const navigation = useNavigation();
+	const { revalidate } = useRevalidator();
 
 	const [isLoading, setIsLoading] = useState(true);
 	const [allocations, setAllocations] = useState<Allocation[]>([]);
 	const [isModalOpen, setIsModalOpen] = useState(false);
-	const [editingAllocation, setEditingAllocationeditingAllocation] = useState<Allocation | null>(null);
+	const [editingAllocation, setEditingAllocation] = useState<Allocation | null>(null);
 
 	// Simulate fetching data
+	// useEffect(() => {
+	// 	setAllocations(data);
+	// 	setIsLoading(false);
+	// }, [navigation.state]);
+
 	useEffect(() => {
 		setAllocations(data);
 		setIsLoading(false);
-	}, [navigation.state]);
+	  }, [data]);
 
 	useEffect(() => {
+		console.log(actionData);
 		if (actionData?.success) {
 			toast.success(actionData.success);
 		}
 		if (actionData?.errors) {
-			toast.error("Ocurrió un error");
+			toast.error("Ocurrió un error:" + actionData.errors);
 		}
 	}, [actionData]);
 
 	const handleOpenCreateModal = () => {
-		setEditingAllocationeditingAllocation(null); // Ensure we are in create mode
+		setEditingAllocation(null); // Ensure we are in create mode
 		setIsModalOpen(true);
 	};
 
 	const handleOpenEditModal = (budget: Allocation) => {
-		setEditingAllocationeditingAllocation(budget);
+		setEditingAllocation(budget);
 		setIsModalOpen(true);
 	};
 
 	const handleCloseModal = () => {
 		setIsModalOpen(false);
-		setEditingAllocationeditingAllocation(null); // Clear editing state on close
+		setEditingAllocation(null); // Clear editing state on close
 	};
 
-	const handleSubmitAllocation = (
-		budgetData: Omit<Allocation, "id" | "spentAmount"> & { id?: string }
-	) => {
-		if (budgetData.id) {
-			// --- Editing Existing Budget ---
-			// In a real app, send PUT/PATCH request to API
-			setAllocations((prevAllocations) =>
-				prevAllocations.map((b) =>
-					b.id === Number(budgetData.id) ? { ...b, amount: budgetData.amount } : b
-				)
-			);
-			console.log("Updating budget:", budgetData);
-		} else {
-			// --- Creating New Budget ---
-			// In a real app, send POST request to API and get back the new ID
-			const newBudget: Allocation = {
-				...budgetData,
-				id: Date.now(), // Generate simple unique numeric ID for demo
-				amountRemaining: 0, // New allocations start with 0 spent
-			};
-			setAllocations((prevAllocations) => [...prevAllocations, newBudget]);
-			console.log("Creating new budget:", newBudget);
-		}
-		handleCloseModal(); // Close modal after submission
-	};
-	console.log(navigation.state);
 	return (
 		<div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
 			{/* Header */}
@@ -173,7 +162,7 @@ const Allocation: React.FC = () => {
 			{/* Mobile FAB */}
 			<button
 				onClick={handleOpenCreateModal}
-				className="fixed bottom-4 right-4 p-4 bg-blue-600 text-white rounded-full shadow-lg sm:hidden"
+				className="fixed bottom-4 right-4 p-4 bg-blue-600 text-white rounded-full shadow-lg"
 				aria-label="Nueva asignación"
 			>
 				<FaPlus />

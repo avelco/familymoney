@@ -1,8 +1,9 @@
 // src/components/AllocationModal.tsx
 import React, { useState, useEffect } from "react";
+import toast from "react-hot-toast";
 import { IoMdClose } from "react-icons/io";
 import { NumberFormatBase, NumericFormat } from "react-number-format";
-import { useActionData, useFetcher } from "react-router";
+import { useActionData, useFetcher, useRevalidator } from "react-router";
 import { LoadingButton, SubmitButton } from "~/components/Buttons";
 import type { Allocation } from "~/interfaces/budgetInterface";
 import { formatMoneyInput } from "~/lib/utils/format";
@@ -20,16 +21,31 @@ const AllocationModal: React.FC<AllocationModalProps> = ({
 	onSubmit,
 	initialData,
 }) => {
-	const actionData = useActionData();
 	const [name, setName] = useState("");
 	const [allocatedAmount, setAllocatedAmount] = useState<number | string>("");
 	let fetcher = useFetcher();
-	let errors = fetcher.data?.errors;
+	const { revalidate } = useRevalidator();
 	let busy = fetcher.state !== "idle";
 
 	useEffect(() => {
-		setName("");
-		setAllocatedAmount("");
+		if (fetcher.state === "idle" && fetcher.data?.success) {
+		  toast.success(fetcher.data.success);
+		  onClose();
+		  fetcher.load(window.location.pathname);
+		}
+		if (fetcher.state === "idle" && fetcher.data?.errors) {
+		  toast.error(Object.values(fetcher.data.errors).join(", "));
+		}
+	  }, [fetcher.state, fetcher.data, onClose, fetcher]);
+
+	useEffect(() => {
+		if (initialData) {
+			setName(initialData.name || "");
+			setAllocatedAmount(initialData.amount?.toString() || "");
+		} else {
+			setName("");
+			setAllocatedAmount("");
+		}
 	}, [initialData, isOpen]);
 
 	if (!isOpen) return null;
@@ -51,7 +67,7 @@ const AllocationModal: React.FC<AllocationModalProps> = ({
 
 				<fetcher.Form method="post" className="space-y-4">
 					<input type="hidden" name="id" value={initialData?.id} />
-					<input type="hidden" name="_action" value="create" />
+					<input type="hidden" name="_action" value={initialData ? "update" : "create"} />
 					<div>
 						<label
 							htmlFor="name"
