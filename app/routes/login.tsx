@@ -4,7 +4,7 @@ import type { Route } from "./+types/login";
 import { commitSession, getSession } from "~/sessions.server";
 import { LoadingButton, SubmitButton } from "~/components/Buttons";
 import type { LoginErrors } from "~/interfaces/userInterface";
-import { getUserByEmail } from "~/lib/db/user.server";
+import { getUserByEmail } from "~/lib/models/user.server";
 import bcrypt from "bcrypt";
 
 export async function loader({

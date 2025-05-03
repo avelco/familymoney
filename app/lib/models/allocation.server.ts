@@ -1,9 +1,27 @@
 import type { AllocationFormData } from "~/interfaces/budgetInterface";
-import { db } from "./db.server";
+import { db } from "../db/db.server";
 
-export const getAllocation = async (allocationId: number) => {
-  return db.allocation.findUnique({
-    where: { id: Number(allocationId) },
+export const getAllocationByBudgetId = async (budgetId: number) => {
+  const allocations = await db.allocation.findMany({
+    where: { budgetId: Number(budgetId) },
+    orderBy: { createdAt: "desc" },
+    include: {
+      transactions: {
+        select: { amount: true }
+      }
+    }
+  });
+
+  // Calculate remaining amount for each allocation
+  return allocations.map(allocation => {
+    const spent = allocation.transactions.reduce(
+      (sum, tx) => sum + tx.amount,
+      0
+    );
+    return {
+      ...allocation,
+      amountRemaining: allocation.amount - spent
+    };
   });
 };
 
@@ -16,6 +34,7 @@ export const getAllocations = async () => {
 export const createAllocation = async (allocation: AllocationFormData) => {
   return db.allocation.create({
     data: {
+      name: allocation.name,
       amount: allocation.amount,
       budgetId: allocation.budgetId,
       userId: allocation.userId,

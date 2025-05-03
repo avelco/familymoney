@@ -1,7 +1,8 @@
 import { Outlet, redirect } from 'react-router'
 import type { Route } from '../+types/root';
-import { getSession } from '~/sessions.server';
+import { destroySession, getSession } from '~/sessions.server';
 import Header from '~/components/Header';
+import type { ActionFunctionArgs } from 'react-router';
 
 export async function loader({
     request,
@@ -16,6 +17,19 @@ export async function loader({
         return redirect("/login");
     }
 }
+
+export async function action({ request }: ActionFunctionArgs) {
+    const formData = await request.formData();
+    if (formData.get("_action") === "logout") {
+      const session = await getSession(request.headers.get("Cookie"));
+      console.log(session)
+      return redirect("/login", {
+        headers: {
+          "Set-Cookie": await destroySession(session),
+        },
+      });
+    }
+  }
 
 export default function privateLayout() {
     return (

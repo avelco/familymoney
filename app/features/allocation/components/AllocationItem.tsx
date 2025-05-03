@@ -1,47 +1,74 @@
 // src/components/AllocationItem.tsx
 import React from "react";
-import type { Allocation } from "../../../interfaces/budgetInterface";
-// import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline"; // Remove Heroicons import
-import { FaEdit, FaTrashAlt } from "react-icons/fa"; // Import from react-icons
+import { CiEdit } from "react-icons/ci";
+import type { Allocation } from "~/interfaces/budgetInterface";
 
 interface AllocationItemProps {
-  allocation: Allocation;
-  onEdit: (allocation: Allocation) => void;
-  onDelete: (allocationId: string) => void;
+	allocation: Allocation;
+	onEdit: (allocation: Allocation) => void;
 }
 
-// ... (formatCurrency helper remains the same)
+// Helper to format currency
+const formatCurrency = (amount: number): string => {
+	return new Intl.NumberFormat("en-US", {
+		style: "currency",
+		currency: "USD",
+	}).format(amount);
+};
 
-const AllocationItem: React.FC<AllocationItemProps> = ({ allocation, onEdit, onDelete }) => {
-  // ... (spentPercentage and progressBarColor logic remains the same)
+const AllocationItem: React.FC<AllocationItemProps> = ({ allocation, onEdit }) => {
+	const spentPercentage =
+		allocation.amount > 0
+			? Math.min(( (allocation.amount - allocation.amountRemaining)/allocation.amount) * 100, 100)
+			: 0;
 
-  return (
-    <div className="bg-gray-50 rounded-md p-3 shadow-sm mb-3 transition hover:bg-gray-100">
-       <div className="flex justify-between items-start mb-1">
-         <h4 className="font-medium text-gray-700">{allocation.name}</h4>
-         <div className="flex space-x-2">
-            <button
-                onClick={() => onEdit(allocation)}
-                className="text-gray-400 hover:text-blue-600 transition-colors p-1"
-                aria-label={`Edit allocation ${allocation.name}`}
-            >
-                {/* Replace Heroicon with react-icon */}
-                <FaEdit className="h-4 w-4" /> {/* Adjust size */}
-            </button>
-             <button
-                onClick={() => onDelete(allocation.id)}
-                className="text-gray-400 hover:text-red-600 transition-colors p-1"
-                aria-label={`Delete allocation ${allocation.name}`}
-            >
-                {/* Replace Heroicon with react-icon */}
-                <FaTrashAlt className="h-4 w-4" /> {/* Adjust size */}
-            </button>
-         </div>
-       </div>
+	// Determine progress bar color based on percentage
+	let progressBarColor = "bg-blue-500"; // Default
+	if (spentPercentage > 90) {
+		progressBarColor = "bg-red-500";
+	} else if (spentPercentage > 70) {
+		progressBarColor = "bg-yellow-500";
+	}
 
-       {/* ... (rest of the component remains the same) ... */}
-    </div>
-  );
+	console.log(allocation);
+	
+	return (
+		<div className="bg-white rounded-lg shadow p-4 transition hover:shadow-md flex flex-col justify-between">
+			<div>
+				<div className="flex justify-between items-start mb-2">
+					<h3 className="text-lg font-semibold text-gray-800">{allocation.name}</h3>
+					<button
+						onClick={() => onEdit(allocation)}
+						className="text-gray-400 hover:text-blue-600 transition-colors p-1 -mt-1 -mr-1"
+						aria-label={`Edit budget ${allocation.budgetId}`}
+					>
+						<CiEdit className="h-5 w-5" />
+					</button>
+				</div>
+
+				<p className="text-sm text-gray-500 mb-3">
+					Asignado:{" "}
+					<span className="font-medium text-gray-700">
+						{formatCurrency(allocation.amount)}
+					</span>
+				</p>
+
+				{/* Progress Bar */}
+				<div className="mb-1">
+					<div className="flex justify-between text-xs text-gray-600 mb-1">
+						<span>Gastado: {formatCurrency(allocation.amount- allocation.amountRemaining)}</span>
+						<span>{spentPercentage.toFixed(0)}%</span>
+					</div>
+					<div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+						<div
+							className={`h-2 rounded-full ${progressBarColor} transition-all duration-300 ease-out`}
+							style={{ width: `${spentPercentage}%` }}
+						></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	);
 };
 
 export default AllocationItem;

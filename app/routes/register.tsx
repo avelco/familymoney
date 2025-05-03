@@ -4,7 +4,7 @@ import type { Route } from "./+types/register";
 import { LoadingButton, SubmitButton } from "~/components/Buttons";
 import type { CreateUser, CreateUserErrors } from "~/interfaces/userInterface";
 import type { ActionData } from "~/interfaces/generalInterface";
-import { createUser } from "~/lib/db/user.server";
+import { createUser } from "~/lib/models/user.server";
 import bcrypt from "bcrypt";
 
 export async function action({ request }: Route.ActionArgs) {

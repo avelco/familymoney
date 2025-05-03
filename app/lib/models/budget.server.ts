@@ -1,0 +1,89 @@
+import type { BudgetFormData } from "~/interfaces/budgetInterface";
+import { db } from "../db/db.server";
+
+
+
+export const getBudget = async (budgetId: number) => {
+  return db.budget.findUnique({
+    where: { id: Number(budgetId) },
+    include: {
+      allocations: true,
+    },
+  });
+};
+
+export const existBudget = async (budgetId: number) => {
+  return db.budget.findUnique({
+    where: { id: Number(budgetId) },
+  });
+};
+
+export const getBudgets = async () => {
+  const budgets = await db.budget.findMany({
+    include: {
+      allocations: {
+        include: {
+          transactions: true,
+        },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  return budgets.map((budget) => {
+    // Sum of allocations
+    const totalAllocations = budget.allocations.reduce(
+      (sum, allocation) => sum + allocation.amount,
+      0
+    );
+
+    // Total spend (sum of all transactions' amounts in all allocations)
+    const totalSpend = budget.allocations.reduce((sum, allocation) => {
+      const allocationSpend = allocation.transactions.reduce(
+        (tSum, transaction) => tSum + transaction.amount,
+        0
+      );
+      return sum + allocationSpend;
+    }, 0);
+
+    // Remaining budget
+    const remainingBudget = totalAllocations - totalSpend;
+
+    return {
+      ...budget,
+      totalAllocations,
+      totalSpend,
+      remainingBudget,
+    };
+  });
+};
+
+export const createBudget = async (budget: BudgetFormData) => {
+  return db.budget.create({
+    data: {
+      name: budget.name,
+      startDate: new Date(budget.startDate),
+      endDate: new Date(budget.endDate),
+    },
+  });
+};
+
+export const updateBudget = async (
+  budgetId: number,
+  budget: BudgetFormData
+) => {
+  return db.budget.update({
+    where: { id: Number(budgetId) },
+    data: {
+      name: budget.name,
+      startDate: new Date(budget.startDate),
+      endDate: new Date(budget.endDate),
+    },
+  });
+};
+
+export const deleteBudget = async (budgetId: number) => {
+  return db.budget.delete({
+    where: { id: Number(budgetId) },
+  });
+};

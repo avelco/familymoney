@@ -1,5 +1,5 @@
 import type { CreateUser } from "~/interfaces/userInterface";
-import { db } from "./db.server";
+import { db } from "../db/db.server";
 
 export const getUser = async (userId: number) => {
   const user = await db.user.findUnique({

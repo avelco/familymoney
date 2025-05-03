@@ -8,6 +8,9 @@ export interface Budget {
 	allocatedAmount: number;
 	spentAmount: number;
 	allocations: Allocation[];
+	totalAllocations?: number;
+	totalSpend?: number;
+	remainingBudget?: number;
 }
 
 export type BudgetFormData = {
@@ -20,17 +23,19 @@ export type BudgetFormData = {
 export interface Allocation {
 	id: number;
 	amount: number;
+	name: string;
 	budgetId: number;
 	userId: number;
 	createdAt: Date;
 	updatedAt: Date;
-	spentAmount: number;
+	amountRemaining: number;
 }
 
 export type AllocationFormData = {
 	amount: number;
 	budgetId: number;
 	userId: number;
+	name: string;
 	id?: number;
 };
 

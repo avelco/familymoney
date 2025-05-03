@@ -11,7 +11,8 @@ export default [
     route("/register", "./routes/register.tsx"),
     layout("./routes/privateLayout.tsx", [
       route("/home", "./routes/home.tsx"),
+      route("/logout", "./routes/logout.tsx"),
       route("/budgets", "./routes/budgets.tsx"),
-      route("/budgets/:id/allocations", "./routes/allocations.tsx"),
+      route("/budgets/:budgetId/allocations", "./routes/allocations.tsx"),
     ]),
 ] satisfies RouteConfig;

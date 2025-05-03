@@ -7,6 +7,7 @@ type ButtonPosition = 'left' | 'center' | 'right';
 interface ButtonProps {
   text: string;
   position?: ButtonPosition;
+  action?: string;
 }
 
 // Helper function to get position classes
@@ -24,10 +25,10 @@ const getPositionClasses = (position: ButtonPosition = 'center'): string => {
   }
 };
 
-export const SubmitButton = ({ text, position = 'center' }: ButtonProps) => {
+export const SubmitButton = ({ text, position = 'center', action = 'submit' }: ButtonProps) => {
   return (
     <div className="w-full flex">
-      <button type="submit" className={getPositionClasses(position)}>
+      <button type="submit" className={getPositionClasses(position)} name="_action" value={action}>
         {text}
       </button>
     </div>

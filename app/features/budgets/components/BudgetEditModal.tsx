@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import type { Budget, BudgetFormData } from "../../../interfaces/budgetInterface";
 import { FaTimes } from "react-icons/fa";
-import { data, Form, useFetcher } from "react-router";
-import type { Route } from ".react-router/types/app/+types/root";
+import { useFetcher, useRevalidator } from "react-router";
+import { SubmitButton } from "~/components/Buttons";
 
 const defaultFormData: BudgetFormData = {
 	name: "",
@@ -10,112 +10,72 @@ const defaultFormData: BudgetFormData = {
 	endDate: "",
 };
 
-interface BudgetModalProps {
-	initialData?: Budget | null;
+interface BudgetEditModalProps {
+	budget: Budget | null;
+	onClose: () => void;
 }
 
-export async function action({
-    request,
-}: Route.ActionArgs) {
-
-    const formData = await request.formData();
-    const name = String(formData.get("name"));
-    const startDate = String(formData.get("startDate"));
-    const endDate = String(formData.get("endDate"));
-
-	const errors: any = {}
-
-	if(!name || name.length < 3) {
-		errors.name = "EL nombre del presupuesto debe tener al menos 3 caracteres";
-	}
-
-	if(!startDate) {
-		errors.startDate = "La fecha de inicio es requerida";
-	}
-
-	if(!endDate) {
-		errors.endDate = "La fecha de fin es requerida";
-	}
-
-	if(startDate > endDate) {
-		errors.startDate = "La fecha de inicio debe ser anterior a la fecha de fin";
-	}
-
-	if(Object.keys(errors).length > 0) {
-		return data({ errors });
-	}
-
-	return data({ errors });
-
-}
-
-const BudgetModal: React.FC<BudgetModalProps> = ({ initialData }) => {
+const BudgetEditModal: React.FC<BudgetEditModalProps> = ({ budget, onClose }) => {
 	let fetcher = useFetcher();
 	let errors = fetcher.data?.errors;
 
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [showFade, setShowFade] = useState(false);
-
-	const [formData, setFormData] = useState<BudgetFormData>(
-		initialData
-			? {
-				name: initialData.name,
-				startDate: initialData.startDate.toISOString().split("T")[0],
-				endDate: initialData.endDate.toISOString().split("T")[0],
-			}
-			: defaultFormData
-	);
-
+	const [formData, setFormData] = useState<BudgetFormData>(defaultFormData);
+  
+	// Open modal when budget prop changes to a non-null value
 	useEffect(() => {
-		if (initialData) {
-			setFormData({
-				name: initialData.name,
-				startDate: initialData.startDate.toISOString().split("T")[0],
-				endDate: initialData.endDate.toISOString().split("T")[0],
-			});
-		} else {
-			setFormData(defaultFormData);
-		}
-	}, [initialData]);
-
-	const handleOpenModal = () => {
-		if (!initialData) {
-			setFormData(defaultFormData);
-		}
+	  if (budget) {
+		setFormData({
+		  name: budget.name,
+		  startDate: budget.startDate.toISOString().split("T")[0],
+		  endDate: budget.endDate.toISOString().split("T")[0],
+		});
 		setIsModalOpen(true);
-	};
-
+	  }
+	}, [budget]);
+  
 	const handleCloseModal = () => {
-		setShowFade(false);
-		setTimeout(() => setIsModalOpen(false), 300); // Wait for fade-out
+	  setShowFade(false);
+	  setTimeout(() => {
+		setIsModalOpen(false);
+		onClose();
+	  }, 300);
 	};
-
-	// Trigger fade-in when modal opens
+  
 	useEffect(() => {
-		if (isModalOpen) {
-			setTimeout(() => setShowFade(true), 10);
-		} else {
-			setShowFade(false);
-		}
+	  if (isModalOpen) {
+		setTimeout(() => setShowFade(true), 10);
+	  } else {
+		setShowFade(false);
+	  }
 	}, [isModalOpen]);
-
+  
 	const handleChange = (
-		e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+	  e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
 	) => {
-		const { name, value, type } = e.target;
-		setFormData((prevData) => ({
-			...prevData,
-			[name]: type === "number" ? parseFloat(value) || 0 : value,
-		}));
+	  const { name, value, type } = e.target;
+	  setFormData((prevData) => ({
+		...prevData,
+		[name]: type === "number" ? parseFloat(value) || 0 : value,
+	  }));
 	};
+  
+	useEffect(() => {
+	  if (fetcher.state !== "idle") {
+		handleCloseModal();
+	  }
+	}, [fetcher.state]);
+  
+	if (!isModalOpen) return null;
 
 	return (
 		<>
 			<button
-				onClick={handleOpenModal}
+				onClick={handleCloseModal}
 				type="button"
 				className="fixed bottom-4 right-4 z-10 p-3 bg-cyan-600 text-white rounded-full shadow-lg hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 transition ease-in-out duration-150"
-				aria-label={initialData ? "Edit budget" : "Add new budget"}
+				aria-label={"Add new budget"}
 			>
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
@@ -148,22 +108,24 @@ const BudgetModal: React.FC<BudgetModalProps> = ({ initialData }) => {
 						</button>
 
 						<h2 className="text-xl font-semibold mb-5 text-gray-800">
-							{initialData ? "Edit Budget Period" : "Create New Budget Period"}
+							Actualizar periodo de presupuesto
 						</h2>
 
 						<fetcher.Form method="post">
+							<input type="hidden" name="id" value={budget?.id} />
+							<input type="hidden" name="_action" value="update" />
 							<div className="mb-4">
 								<label
 									htmlFor="name"
 									className="block text-sm font-medium text-gray-700 mb-1"
 								>
-									Budget Name
+									Nombre del presupuesto
 								</label>
 								<input
 									type="text"
 									id="name"
 									name="name"
-									value={formData.name}
+									defaultValue={formData.name}
 									onChange={handleChange}
 									required
 									className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-cyan-500 focus:border-cyan-500"
@@ -176,7 +138,7 @@ const BudgetModal: React.FC<BudgetModalProps> = ({ initialData }) => {
 										htmlFor="startDate"
 										className="block text-sm font-medium text-gray-700 mb-1"
 									>
-										Start Date
+										Fecha inicio
 									</label>
 									<input
 										type="date"
@@ -194,7 +156,7 @@ const BudgetModal: React.FC<BudgetModalProps> = ({ initialData }) => {
 										htmlFor="endDate"
 										className="block text-sm font-medium text-gray-700 mb-1"
 									>
-										End Date
+										Fecha fin
 									</label>
 									<input
 										type="date"
@@ -214,14 +176,9 @@ const BudgetModal: React.FC<BudgetModalProps> = ({ initialData }) => {
 									onClick={handleCloseModal}
 									className="mr-2 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
 								>
-									Cancel
+									Cancelar
 								</button>
-								<button
-									type="submit"
-									className="px-4 py-2 text-sm font-medium text-white bg-cyan-600 rounded-md hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500"
-								>
-									{initialData ? "Update Budget" : "Create Budget"}
-								</button>
+								<SubmitButton text="Actualizar periodo de presupuesto" action="update" position="right" />
 							</div>
 						</fetcher.Form>
 					</div>
@@ -231,4 +188,4 @@ const BudgetModal: React.FC<BudgetModalProps> = ({ initialData }) => {
 	);
 };
 
-export default BudgetModal;
+export default BudgetEditModal;
