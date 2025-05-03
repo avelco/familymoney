@@ -29,6 +29,7 @@ export interface Allocation {
 	createdAt: Date;
 	updatedAt: Date;
 	amountRemaining: number;
+	transactions: Transaction[];
 }
 
 export type AllocationFormData = {

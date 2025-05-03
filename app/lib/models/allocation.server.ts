@@ -61,3 +61,10 @@ export const deleteAllocation = async (allocationId: number) => {
     where: { id: Number(allocationId) },
   });
 };
+
+export const allocationHasTransactions = async (allocationId: number) => {
+  const count = await db.transaction.count({
+    where: { allocationId: Number(allocationId) },
+  });
+  return count > 0;
+};

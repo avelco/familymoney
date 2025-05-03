@@ -56,20 +56,17 @@ export default function Budget() {
 	console.log(budgets);
 	return (
 		<>
-			<div className="p-4 md:p-6 lg:p-8">
-				<div className="flex justify-between items-center mb-6">
+		<div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+			{/* Header */}
+			<div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 space-y-4 sm:space-y-0">
+				<div className="flex flex-col">
 					<Breadcrumb crumbs={[
 						{ label: "Home", path: "/" },
 						{ label: "Presupuestos", path: "/budgets" },
 					]} />
 					<h1 className="text-2xl md:text-3xl font-bold text-gray-800">Presupuestos</h1>
-					{/* <button
-						className="inline-flex items-center px-4 py-2 rounded-md border border-blue-500 px-3 py-1.5 text-sm font-semibold text-blue-700 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:border-blue-400 dark:text-blue-300 dark:hover:bg-blue-900/20 dark:focus:ring-offset-gray-800 transition-colors duration-150 ease-in-out"
-					>
-						<FaPlus className="h-4 w-4 mr-1 -ml-1" />
-						Agregar asignación
-					</button> */}
 				</div>
+			</div>
 				<div className="relative overflow-x-auto shadow-lg sm:rounded-lg bg-white dark:bg-gray-800">
 					<table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 divide-y divide-gray-200 dark:divide-gray-700">
 						<thead className="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-gray-700 dark:text-gray-300">

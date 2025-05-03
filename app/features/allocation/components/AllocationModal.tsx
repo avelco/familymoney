@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { IoMdClose } from "react-icons/io";
 import { NumberFormatBase, NumericFormat } from "react-number-format";
-import { useFetcher } from "react-router";
+import { useActionData, useFetcher } from "react-router";
 import { LoadingButton, SubmitButton } from "~/components/Buttons";
 import type { Allocation } from "~/interfaces/budgetInterface";
 import { formatMoneyInput } from "~/lib/utils/format";
@@ -20,6 +20,7 @@ const AllocationModal: React.FC<AllocationModalProps> = ({
 	onSubmit,
 	initialData,
 }) => {
+	const actionData = useActionData();
 	const [name, setName] = useState("");
 	const [allocatedAmount, setAllocatedAmount] = useState<number | string>("");
 	let fetcher = useFetcher();
@@ -27,10 +28,9 @@ const AllocationModal: React.FC<AllocationModalProps> = ({
 	let busy = fetcher.state !== "idle";
 
 	useEffect(() => {
-		// Reset form when opening for creation
 		setName("");
 		setAllocatedAmount("");
-	}, [initialData, isOpen]); // Depend on isOpen to reset when re-opening for create
+	}, [initialData, isOpen]);
 
 	if (!isOpen) return null;
 

@@ -1,5 +1,4 @@
-import { data } from "react-router";
-import { createAllocation } from "~/lib/models/allocation.server";
+import { allocationHasTransactions, createAllocation, deleteAllocation } from "~/lib/models/allocation.server";
 
 export async function createAllocationAction(formData: FormData) {
   const name = String(formData.get("name"));
@@ -23,7 +22,7 @@ export async function createAllocationAction(formData: FormData) {
   }
 
   if (Object.keys(errors).length > 0) {
-    return data({ errors });
+    return { errors };
   }
 
   const allocation = await createAllocation({
@@ -34,7 +33,26 @@ export async function createAllocationAction(formData: FormData) {
   });
 
   if (!allocation) {
-    return data({ errors: { allocation: "Error al crear la asignación" } });
+    return { errors: { allocation: "Error al crear la asignación" } };
   }
-  return allocation;
+
+  return { data: allocation };
+}
+
+
+export async function deleteAllocationAction(formData: FormData) {
+  const allocationId = String(formData.get("allocationId"));
+  const errors: any = {};
+  const hasTransactions = await allocationHasTransactions(Number(allocationId));
+  if (hasTransactions) {
+    errors.allocation = "No se puede eliminar la asignación porque tiene transacciones";
+    return { errors };
+  }
+  const allocation = await deleteAllocation(Number(allocationId));
+
+  if (!allocation) {
+    return { errors: { allocation: "Error al eliminar la asignación" } };
+  }
+  
+  return { data: allocation };
 }

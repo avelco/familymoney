@@ -3,6 +3,7 @@ import type { Route } from '../+types/root';
 import { destroySession, getSession } from '~/sessions.server';
 import Header from '~/components/Header';
 import type { ActionFunctionArgs } from 'react-router';
+import { Toaster } from 'react-hot-toast';
 
 export async function loader({
     request,
@@ -42,6 +43,7 @@ export default function privateLayout() {
                 <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                     <Outlet />
                 </main>
+                <Toaster />
             </div>
         </>
     )
