@@ -14,5 +14,8 @@ export default [
       route("/logout", "./routes/logout.tsx"),
       route("/budgets", "./routes/budgets.tsx"),
       route("/budgets/:budgetId/allocations", "./routes/allocations.tsx"),
+      route("/wallets", "./routes/wallets.tsx"),
+      route("/wallets/create", "./routes/walletsCreate.tsx"),
+      route("/transactions", "./routes/transactions.tsx"),
     ]),
 ] satisfies RouteConfig;

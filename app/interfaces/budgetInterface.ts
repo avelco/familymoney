@@ -1,3 +1,5 @@
+import type { Transaction } from "./transactionInterface";
+
 export interface Budget {
 	id: number;
 	name: string;
@@ -51,18 +53,6 @@ export interface User {
 	name: string;
 	email: string;
 	isActive: boolean;
-	createdAt: Date;
-	updatedAt: Date;
-}
-
-export interface Transaction {
-	id: number;
-	amount: number;
-	date: Date;
-	allocationId: number;
-	userId: number;
-	accountId: number;
-	walletId: number;
 	createdAt: Date;
 	updatedAt: Date;
 }

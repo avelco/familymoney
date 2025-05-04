@@ -2,14 +2,14 @@
 import React, { useState, useEffect } from "react";
 import { FaPlus } from "react-icons/fa";
 import Breadcrumb from "~/components/Breadcrumb";
-import AllocationItem from "~/features/allocation/components/AllocationItem";
-import AllocationModal from "~/features/allocation/components/AllocationModal";
+import AllocationItem from "~/features/allocations/components/AllocationItem";
+import AllocationModal from "~/features/allocations/components/AllocationModal";
 import type { Allocation } from "~/interfaces/budgetInterface";
 import type { Route } from "../+types/root";
 import { getAllocationByBudgetId } from "~/lib/models/allocation.server";
 import { redirect, useActionData, useLoaderData, useNavigation, useParams, useRevalidator } from "react-router";
 import { getSession } from "~/sessions.server";
-import { createAllocationAction, deleteAllocationAction, updateAllocationAction } from "~/features/allocation/allocationActions";
+import { createAllocationAction, deleteAllocationAction, updateAllocationAction } from "~/features/allocations/allocationActions";
 import { existBudget } from "~/lib/models/budget.server";
 import toast from "react-hot-toast";
 

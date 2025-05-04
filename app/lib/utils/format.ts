@@ -6,3 +6,11 @@ export const formatMoneyInput = (value: string | number) => {
   }
   return num.toLocaleString();
 };
+
+
+export const formatMoney = (amount: number) => {
+	return new Intl.NumberFormat('en-US', {
+		style: 'currency',
+		currency: 'USD',
+	}).format(amount);
+}

@@ -10,6 +10,7 @@ import { useState } from "react";
 import BudgetCreateModal from "~/features/budgets/components/BudgetCreateModal";
 import BudgetEditModal from "~/features/budgets/components/BudgetEditModal";
 import Breadcrumb from "~/components/Breadcrumb";
+import { formatMoney } from "~/lib/utils/format";
 
 export async function loader({ params }: Route.LoaderArgs) {
 	const budget = await getBudgets()
@@ -30,13 +31,6 @@ export async function action({
 		case "delete":
 			return deleteBudgetAction(formData);
 	}
-}
-
-const formatMoney = (amount: number) => {
-	return new Intl.NumberFormat('en-US', {
-		style: 'currency',
-		currency: 'USD',
-	}).format(amount);
 }
 
 export default function Budget() {

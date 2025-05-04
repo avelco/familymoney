@@ -148,13 +148,19 @@ const Header: React.FC<HeaderProps> = ({ userName, userImage }) => {
 										to="/profile"
 										className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
 									>
-										Your Profile
+										Tu perfil
 									</Link>
 									<Link
 										to="/settings"
 										className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
 									>
-										Settings
+										Configuración
+									</Link>
+									<Link
+										to="/wallets"
+										className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+									>
+										Cuentas
 									</Link>
 									<Form method="post" action="/logout">
 										<button

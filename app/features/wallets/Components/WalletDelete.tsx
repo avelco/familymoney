@@ -1,14 +1,14 @@
 import { FaTrashAlt } from 'react-icons/fa'
 import { useFetcher } from 'react-router';
 
-const BudgetDelete = ({ budgetId }: { budgetId: number }) => {
+const WalletDelete = ({ walletId }: { walletId: number }) => {
     let fetcher = useFetcher();
 
     let busy = fetcher.state !== "idle";
 
     return (
         <fetcher.Form method="post">
-            <input type="hidden" name="id" value={budgetId} />
+            <input type="hidden" name="id" value={walletId} />
             {!busy ? (
                 <button
                     name="_action"
@@ -48,4 +48,4 @@ const BudgetDelete = ({ budgetId }: { budgetId: number }) => {
     )
 }
 
-export default BudgetDelete
+export default WalletDelete;
