@@ -3,19 +3,25 @@ import { CiEdit } from "react-icons/ci";
 import { FaTrash, FaPlus } from "react-icons/fa";
 import Breadcrumb from "~/components/Breadcrumb";
 import AllocationSummary from "~/features/transactions/Component/AllocationSummary";
-import type { Route } from "./+types/transactions";
-import { useLoaderData } from "react-router";
+import { Link, useLoaderData } from "react-router";
 import { activeAllocationsAction } from "~/features/transactions/transactionActions";
+import { getCurrentBudget } from "~/lib/models/budget.server";
+import { getTransactionsByBudgetId } from "~/lib/models/transaction.server";
 
-export async function loader({ params }: Route.LoaderArgs) {
+export async function loader() {
 	const allocations = await activeAllocationsAction();
-	const transactions = [[]]
+	const budget = await getCurrentBudget();
+	if (!budget) {
+		return { allocations, transactions: [] };
+	}
+	const transactions = await getTransactionsByBudgetId(budget.id);
 	return { allocations, transactions };
 }
 
 export default function Transactions() {
 	const { allocations, transactions } = useLoaderData();
-
+	console.log(transactions);
+	console.log(allocations);
 	return (
 		<div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
 			{/* Header & Breadcrumb */}
@@ -31,13 +37,7 @@ export default function Transactions() {
 						Transaction Management
 					</h1>
 				</div>
-				<button
-					className="inline-flex items-center gap-2 rounded-md border border-blue-500 px-4 py-2 text-sm font-semibold text-blue-700 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:border-blue-400 dark:text-blue-300 dark:bg-gray-800 dark:hover:bg-blue-900/20 dark:focus:ring-offset-gray-800 transition-colors duration-150 ease-in-out"
-					type="button"
-				>
-					<FaPlus className="h-4 w-4" />
-					New Transaction
-				</button>
+
 			</div>
 
 			<AllocationSummary allocations={allocations} />
@@ -151,6 +151,26 @@ export default function Transactions() {
 					Next
 				</button>
 			</div>
+			<Link
+                        to="/transactions/create"
+                        className="fixed bottom-4 right-4 z-10 p-3 bg-cyan-600 text-white rounded-full shadow-lg hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 transition ease-in-out duration-150"
+                        aria-label={"Add new budget"}
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-6 w-6"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M12 4v16m8-8H4"
+                            />
+                        </svg>
+                    </Link>			
 		</div>
 
 	);

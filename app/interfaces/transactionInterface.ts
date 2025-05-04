@@ -5,7 +5,6 @@ export interface Transaction {
   date: Date;
   allocationId?: number | null;
   userId: number;
-  accountId?: number | null;
   walletId: number;
   createdAt: Date;
   updatedAt: Date;
@@ -18,8 +17,8 @@ export interface TransactionFormData {
     date: Date;
     allocationId?: number | null;
     userId: number;
-    accountId?: number | null;
     walletId: number;
+    description: string;
     createdAt?: Date;
     updatedAt?: Date;
 }

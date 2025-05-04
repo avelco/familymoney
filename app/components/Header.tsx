@@ -22,9 +22,10 @@ const Header: React.FC<HeaderProps> = ({ userName, userImage }) => {
 	// Main navigation menu items
 	const menuItems: MenuItem[] = [
 		{ label: "Dashboard", path: "/dashboard" },
-		{ label: "Transactions", path: "/transactions" },
-		{ label: "Budgets", path: "/budgets" },
-		{ label: "Reports", path: "/reports" },
+		{ label: "Transacciones", path: "/transactions" },
+		{ label: "Presupuestos", path: "/budgets" },
+		{ label: "Cuentas", path: "/wallets" },
+		{ label: "Reportes", path: "/reports" },
 	];
 
 	// Close dropdown when clicking outside
@@ -155,12 +156,6 @@ const Header: React.FC<HeaderProps> = ({ userName, userImage }) => {
 										className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
 									>
 										Configuración
-									</Link>
-									<Link
-										to="/wallets"
-										className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-									>
-										Cuentas
 									</Link>
 									<Form method="post" action="/logout">
 										<button

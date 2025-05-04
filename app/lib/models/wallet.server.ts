@@ -1,6 +1,10 @@
 import type { CreateWalletInput } from "~/interfaces/walletInterface";
 import { db } from "../db/db.server";
 
+export async function getWallets() {
+	return db.wallet.findMany();
+}
+
 export async function getAllWalletsWithBalance() {
   return db.$queryRaw`
     SELECT

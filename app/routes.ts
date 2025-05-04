@@ -17,5 +17,6 @@ export default [
       route("/wallets", "./routes/wallets.tsx"),
       route("/wallets/create", "./routes/walletsCreate.tsx"),
       route("/transactions", "./routes/transactions.tsx"),
+      route("/transactions/create", "./routes/transactionsCreate.tsx"),
     ]),
 ] satisfies RouteConfig;

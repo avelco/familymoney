@@ -1,7 +1,19 @@
 import type { BudgetFormData } from "~/interfaces/budgetInterface";
 import { db } from "../db/db.server";
 
-
+export const getCurrentBudget = async () => {
+    const budget = await db.budget.findFirst({
+        where: {
+            startDate: {
+                lte: new Date(),
+            },
+            endDate: {
+                gte: new Date(),
+            },
+        },
+    });
+    return budget;
+};
 
 export const getBudget = async (budgetId: number) => {
   return db.budget.findUnique({
