@@ -1,8 +1,8 @@
 import type { BudgetFormData } from "~/interfaces/budgetInterface";
-import { db } from "../db/db.server";
+import prisma from "../db.server";
 
 export const getCurrentBudget = async () => {
-    const budget = await db.budget.findFirst({
+    const budget = await prisma.budget.findFirst({
         where: {
             startDate: {
                 lte: new Date(),
@@ -16,7 +16,7 @@ export const getCurrentBudget = async () => {
 };
 
 export const getBudget = async (budgetId: number) => {
-  return db.budget.findUnique({
+  return prisma.budget.findUnique({
     where: { id: Number(budgetId) },
     include: {
       allocations: true,
@@ -25,13 +25,13 @@ export const getBudget = async (budgetId: number) => {
 };
 
 export const existBudget = async (budgetId: number) => {
-  return db.budget.findUnique({
+  return prisma.budget.findUnique({
     where: { id: Number(budgetId) },
   });
 };
 
 export const getBudgets = async () => {
-  const budgets = await db.budget.findMany({
+  const budgets = await prisma.budget.findMany({
     include: {
       allocations: {
         include: {
@@ -71,7 +71,7 @@ export const getBudgets = async () => {
 };
 
 export const createBudget = async (budget: BudgetFormData) => {
-  return db.budget.create({
+  return prisma.budget.create({
     data: {
       name: budget.name,
       startDate: new Date(budget.startDate),
@@ -84,7 +84,7 @@ export const updateBudget = async (
   budgetId: number,
   budget: BudgetFormData
 ) => {
-  return db.budget.update({
+  return prisma.budget.update({
     where: { id: Number(budgetId) },
     data: {
       name: budget.name,
@@ -95,7 +95,7 @@ export const updateBudget = async (
 };
 
 export const deleteBudget = async (budgetId: number) => {
-  return db.budget.delete({
+  return prisma.budget.delete({
     where: { id: Number(budgetId) },
   });
 };

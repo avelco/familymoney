@@ -1,8 +1,9 @@
 import type { TransactionFormData } from "~/interfaces/transactionInterface";
-import { db } from "../db/db.server";
+import prisma from "../db.server";
+
 
 export const getTransactionsByBudgetId = async (budgetId: number) => {
-  const transactions = await db.transaction.findMany({
+  const transactions = await prisma.transaction.findMany({
     where: { allocation: { budgetId: Number(budgetId) } },
     include: {
       allocation: true,
@@ -11,12 +12,12 @@ export const getTransactionsByBudgetId = async (budgetId: number) => {
     orderBy: { date: "desc" },
   });
 
-  return { transactions };
+  return transactions;
 };
 
 export async function activeAllocations() {
   // 1. Obtener el último presupuesto según la fecha de inicio
-  const lastBudget = await db.budget.findFirst({
+  const lastBudget = await prisma.budget.findFirst({
     orderBy: {
       startDate: "desc",
     },
@@ -52,8 +53,13 @@ export async function activeAllocations() {
 }
 
 export async function createTransaction(transaction: TransactionFormData) {
-  return db.transaction.create({
+  return prisma.transaction.create({
     data: transaction,
   });
 }
 
+export async function deleteTransaction(transactionId: number) {
+  return prisma.transaction.delete({
+    where: { id: transactionId },
+  });
+}

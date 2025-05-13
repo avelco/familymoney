@@ -1,11 +1,11 @@
 import { data, Form, useActionData, useNavigation } from "react-router";
 import { FcMoneyTransfer } from "react-icons/fc";
-import type { Route } from "./+types/register";
 import { LoadingButton, SubmitButton } from "~/components/Buttons";
 import type { CreateUser, CreateUserErrors } from "~/interfaces/userInterface";
 import type { ActionData } from "~/interfaces/generalInterface";
 import { createUser } from "~/lib/models/user.server";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
+import type { Route } from "../+types/root";
 
 export async function action({ request }: Route.ActionArgs) {
 	const formData = await request.formData();

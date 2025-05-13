@@ -1,12 +1,12 @@
 import type { CreateWalletInput } from "~/interfaces/walletInterface";
-import { db } from "../db/db.server";
+import prisma from "../db.server";
 
 export async function getWallets() {
-	return db.wallet.findMany();
+	return prisma.wallet.findMany();
 }
 
 export async function getAllWalletsWithBalance() {
-  return db.$queryRaw`
+  return prisma.$queryRaw`
     SELECT
       w.id,
       w.name,
@@ -24,13 +24,13 @@ export async function getAllWalletsWithBalance() {
 }
 
 export async function createWallet(wallet: CreateWalletInput) {
-  return db.wallet.create({
+  return prisma.wallet.create({
     data: wallet,
   });
 }
 
 export async function deleteWallet(id: number) {
-  return db.wallet.delete({
+  return prisma.wallet.delete({
     where: {
       id,
     },

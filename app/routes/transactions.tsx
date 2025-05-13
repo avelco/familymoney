@@ -1,12 +1,13 @@
 // src/pages/Transactions.jsx
 import { CiEdit } from "react-icons/ci";
-import { FaTrash, FaPlus } from "react-icons/fa";
 import Breadcrumb from "~/components/Breadcrumb";
 import AllocationSummary from "~/features/transactions/Component/AllocationSummary";
 import { Link, useLoaderData } from "react-router";
-import { activeAllocationsAction } from "~/features/transactions/transactionActions";
+import { activeAllocationsAction, deleteTransactionAction } from "~/features/transactions/transactionActions";
 import { getCurrentBudget } from "~/lib/models/budget.server";
 import { getTransactionsByBudgetId } from "~/lib/models/transaction.server";
+import TransactionDelete from "~/features/transactions/Component/TransactionDelete";
+import { formatMoney } from "~/lib/utils/format";
 
 export async function loader() {
 	const allocations = await activeAllocationsAction();
@@ -18,10 +19,17 @@ export async function loader() {
 	return { allocations, transactions };
 }
 
+export async function action({ request }: any) {
+	const formData = new URLSearchParams(await request.text());
+	const action = formData.get("_action");
+	if (action === "delete") {
+		const transactionId = Number(formData.get("id"));
+		await deleteTransactionAction(transactionId);
+	}
+}
+
 export default function Transactions() {
 	const { allocations, transactions } = useLoaderData();
-	console.log(transactions);
-	console.log(allocations);
 	return (
 		<div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
 			{/* Header & Breadcrumb */}
@@ -34,7 +42,7 @@ export default function Transactions() {
 						]}
 					/>
 					<h1 className="text-2xl md:text-3xl font-bold text-gray-800 dark:text-gray-100">
-						Transaction Management
+						Transacciones
 					</h1>
 				</div>
 
@@ -45,17 +53,17 @@ export default function Transactions() {
 			{/* Filters */}
 			<div className="flex flex-wrap gap-4 mb-6">
 				<select className="border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-lg px-3 py-2 text-gray-700 dark:text-gray-200">
-					<option value="">All Types</option>
-					<option value="expense">Expense</option>
-					<option value="deposit">Deposit</option>
+					<option value="">Todos los tipos</option>
+					<option value="expense">Gasto</option>
+					<option value="deposit">Deposito</option>
 				</select>
 				<select className="border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-lg px-3 py-2 text-gray-700 dark:text-gray-200">
-					<option value="">All Wallets</option>
+					<option value="">Todas las cuentas</option>
 					<option value="1">Main Wallet</option>
 					<option value="2">Emergency Fund</option>
 				</select>
 				<select className="border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-lg px-3 py-2 text-gray-700 dark:text-gray-200">
-					<option value="">All Accounts</option>
+					<option value="">Todas las asignaciones</option>
 					<option value="1">Checking</option>
 					<option value="2">Savings</option>
 				</select>
@@ -76,12 +84,11 @@ export default function Transactions() {
 				<table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 divide-y divide-gray-200 dark:divide-gray-700">
 					<thead className="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-gray-700 dark:text-gray-300">
 						<tr>
-							<th className="px-6 py-4 font-medium text-center">Date</th>
-							<th className="px-6 py-4 font-medium text-center">Type</th>
-							<th className="px-6 py-4 font-medium text-center">Amount</th>
-							<th className="px-6 py-4 font-medium text-center">Wallet</th>
-							<th className="px-6 py-4 font-medium text-center">Account</th>
-							<th className="px-6 py-4 font-medium text-center">Allocation</th>
+							<th className="px-6 py-4 font-medium text-center">Fecha</th>
+							<th className="px-6 py-4 font-medium text-center">Tipo</th>
+							<th className="px-6 py-4 font-medium text-center">Cantidad</th>
+							<th className="px-6 py-4 font-medium text-center">Billetera</th>
+							<th className="px-6 py-4 font-medium text-center">Asignación</th>
 							<th className="px-6 py-4">
 								<span className="sr-only">Actions</span>
 							</th>
@@ -91,7 +98,7 @@ export default function Transactions() {
 						{transactions.length === 0 && (
 							<tr>
 								<td colSpan={7} className="px-6 py-4 text-center">
-									No transactions found
+									No se encontraron transacciones.
 								</td>
 							</tr>
 						)}
@@ -100,9 +107,9 @@ export default function Transactions() {
 								key={transaction.id}
 								className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-150 ease-in-out"
 							>
-								<td className="px-6 py-4 text-center">{transaction.date}</td>
+								<td className="px-6 py-4 text-center">{transaction.date.toLocaleDateString()}</td>
 								<td className="px-6 py-4 text-center capitalize">
-									{transaction.type}
+									{transaction.type === "expense" ? "Gasto" : "Deposito"}
 								</td>
 								<td
 									className={`px-6 py-4 text-center font-medium ${transaction.type === "expense"
@@ -110,11 +117,10 @@ export default function Transactions() {
 										: "text-green-600 dark:text-green-400"
 										}`}
 								>
-									${transaction.amount}
+									{formatMoney(transaction.amount)}
 								</td>
-								<td className="px-6 py-4 text-center">{transaction.wallet}</td>
-								<td className="px-6 py-4 text-center">{transaction.account}</td>
-								<td className="px-6 py-4 text-center">{transaction.allocation}</td>
+								<td className="px-6 py-4 text-center">{transaction.wallet.name}</td>
+								<td className="px-6 py-4 text-center">{transaction.allocation.name}</td>
 								<td className="px-6 py-4 text-right">
 									<div className="flex items-center gap-x-1 justify-end">
 										<button
@@ -124,13 +130,7 @@ export default function Transactions() {
 										>
 											<CiEdit className="h-4 w-4" aria-hidden="true" />
 										</button>
-										<button
-											className="inline-flex items-center rounded-md border border-red-500 px-3 py-1.5 text-sm font-semibold text-red-700 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:border-red-400 dark:text-red-300 dark:hover:bg-red-900/20 dark:focus:ring-offset-gray-800 transition-colors duration-150 ease-in-out"
-											type="button"
-										// onClick={...}
-										>
-											<FaTrash className="h-4 w-4" aria-hidden="true" />
-										</button>
+										<TransactionDelete transactionId={transaction.id} />
 									</div>
 								</td>
 							</tr>

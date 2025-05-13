@@ -1,8 +1,8 @@
 import type { AllocationFormData, AllocationUpdateFormData } from "~/interfaces/budgetInterface";
-import { db } from "../db/db.server";
+import prisma from "../db.server";
 
 export const getAllocationByBudgetId = async (budgetId: number) => {
-  const allocations = await db.allocation.findMany({
+  const allocations = await prisma.allocation.findMany({
     where: { budgetId: Number(budgetId) },
     orderBy: { createdAt: "desc" },
     include: {
@@ -26,13 +26,13 @@ export const getAllocationByBudgetId = async (budgetId: number) => {
 };
 
 export const getAllocations = async () => {
-  return db.allocation.findMany({
+  return prisma.allocation.findMany({
     orderBy: { createdAt: "desc" },
   });
 };
 
 export const createAllocation = async (allocation: AllocationFormData) => {
-  return db.allocation.create({
+  return prisma.allocation.create({
     data: {
       name: allocation.name,
       amount: allocation.amount,
@@ -46,7 +46,7 @@ export const updateAllocation = async (
   allocationId: number,
   allocation: AllocationUpdateFormData
 ) => {
-  return db.allocation.update({
+  return prisma.allocation.update({
     where: { id: Number(allocationId) },
     data: {
       amount: allocation.amount,
@@ -56,13 +56,13 @@ export const updateAllocation = async (
 };
 
 export const deleteAllocation = async (allocationId: number) => {
-  return db.allocation.delete({
+  return prisma.allocation.delete({
     where: { id: Number(allocationId) },
   });
 };
 
 export const allocationHasTransactions = async (allocationId: number) => {
-  const count = await db.transaction.count({
+  const count = await prisma.transaction.count({
     where: { allocationId: Number(allocationId) },
   });
   return count > 0;

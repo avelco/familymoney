@@ -1,8 +1,8 @@
 import type { CreateUser } from "~/interfaces/userInterface";
-import { db } from "../db/db.server";
+import prisma from "../db.server";
 
 export const getUser = async (userId: number) => {
-  const user = await db.user.findUnique({
+  const user = await prisma.user.findUnique({
     where: {
       id: Number(userId), // Ensure ID is a number for the query
     },
@@ -19,7 +19,7 @@ export const getUser = async (userId: number) => {
 };
 
 export const getUserByEmail = async (email: string) => {
-  const user = await db.user.findUnique({
+  const user = await prisma.user.findUnique({
     where: {
       email: email,
     },
@@ -37,14 +37,14 @@ export const getUserByEmail = async (email: string) => {
 };
 
 export const createUser = async (user: CreateUser) => {
-  const newUser = await db.user.create({
+  const newUser = await prisma.user.create({
     data: user,
   });
   return newUser;
 };
 
 export const updateUser = async (userId: number, user: any) => {
-  const updatedUser = await db.user.update({
+  const updatedUser = await prisma.user.update({
     where: {
       id: Number(userId),
     },
@@ -54,7 +54,7 @@ export const updateUser = async (userId: number, user: any) => {
 };
 
 export const deleteUser = async (userId: number) => {
-  const deletedUser = await db.user.delete({
+  const deletedUser = await prisma.user.delete({
     where: {
       id: Number(userId),
     },
