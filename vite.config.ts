@@ -15,4 +15,10 @@ export default defineConfig({
       "sqlite3",
     ],
   },
+  server: {
+    allowedHosts: [
+      "familymoney.store",
+      "www.familymoney.store"
+    ],
+  },
 });
