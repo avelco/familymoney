@@ -27,6 +27,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('budgets', BudgetController::class);
     Route::resource('budgets.allocations', AllocationController::class);
     Route::resource('transactions', TransactionController::class);
+    Route::get('dashboard', function () {
+        return Inertia::render('dashboard');
+    })->name('dashboard');
 });
 
 require __DIR__ . '/settings.php';

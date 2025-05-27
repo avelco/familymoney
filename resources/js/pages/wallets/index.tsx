@@ -160,7 +160,7 @@ export default function Index({ wallets, totalBalance, depositsThisMonth, expens
                                             {wallet.currency}
                                         </Badge>
                                         <span className="text-sm text-muted-foreground">
-                                            {formatCurrency(wallet.current_balance, wallet.currency)}
+                                            {formatCurrency(wallet.expense_total, wallet.currency)}
                                         </span>
                                     </div>
                                 </div>

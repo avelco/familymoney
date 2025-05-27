@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatCurrency } from "@/lib/utils"
-import { CreditCard, DollarSign } from "lucide-react"
+import { CreditCard, ChevronDown, ChevronUp, DollarSign } from "lucide-react"
 
 interface SummaryProps {
     totalBalance: number;
@@ -34,7 +34,7 @@ export const Summary = ({totalBalance, depositsThisMonth, expensesThisMonth, las
                             <CardTitle className="text-sm font-medium">
                                 Gastado en este mes
                             </CardTitle>
-                            <DollarSign className="h-4 w-4 text-muted-foreground" />
+                            <ChevronUp className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">
@@ -51,7 +51,7 @@ export const Summary = ({totalBalance, depositsThisMonth, expensesThisMonth, las
                             <CardTitle className="text-sm font-medium">
                                 Depositado en este mes
                             </CardTitle>
-                            <DollarSign className="h-4 w-4 text-muted-foreground" />
+                            <ChevronDown className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">

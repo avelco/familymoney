@@ -216,8 +216,8 @@ export default function Show({ budget, allocations, totalAllocated, totalSpent }
                                                     <span className="text-lg font-bold">{formatCurrency(allocation.amount)}</span>
                                                 </div>
                                                 <div className="flex items-center justify-between">
-                                                    <span className="text-sm text-muted-foreground">% del total</span>
-                                                    <span className="text-sm font-medium">{allocationPercentage.toFixed(1)}%</span>
+                                                    <span className="text-sm text-muted-foreground">Gastado</span>
+                                                    <span className="text-sm text-red-600 font-medium">{allocation.transactions_sum_amount ? formatCurrency(allocation.transactions_sum_amount) : '0'}</span>
                                                 </div>
                                             </div>
                                             <Progress value={allocationPercentage} className="h-2" />

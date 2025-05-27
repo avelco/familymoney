@@ -4,7 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreTransactionRequest;
 use App\Http\Requests\UpdateTransactionRequest;
+use App\Models\Allocation;
 use App\Models\Transaction;
+use App\Models\Wallet;
+use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 
 class TransactionController extends Controller
 {
@@ -13,7 +17,13 @@ class TransactionController extends Controller
      */
     public function index()
     {
-        //
+        $transactions = Transaction::with('allocation', 'wallet')
+            ->latest('created_at')
+            ->get();
+
+        return Inertia::render('transactions/index', [
+            'transactions' => $transactions,
+        ]);
     }
 
     /**
@@ -21,7 +31,12 @@ class TransactionController extends Controller
      */
     public function create()
     {
-        //
+        $allocations = Allocation::all();
+        $wallets = Wallet::all();
+        return Inertia::render('transactions/create', [
+            'allocations' => $allocations,
+            'wallets' => $wallets,
+        ]);
     }
 
     /**
@@ -29,7 +44,16 @@ class TransactionController extends Controller
      */
     public function store(StoreTransactionRequest $request)
     {
-        //
+        $transaction = Transaction::create([
+            'amount' => $request->validated()['amount'],
+            'description' => $request->validated()['description'],
+            'type' => $request->validated()['type'],
+            'date' => $request->validated()['date'],
+            'allocation_id' => $request->validated()['allocation_id'],
+            'wallet_id' => $request->validated()['wallet_id'],
+            'user_id' => Auth::user()->id,
+        ]);
+        return to_route('transactions.index')->with('message', 'Transacción creada correctamente');
     }
 
     /**
@@ -37,7 +61,9 @@ class TransactionController extends Controller
      */
     public function show(Transaction $transaction)
     {
-        //
+        return Inertia::render('transactions/show', [
+            'transaction' => $transaction,
+        ]);
     }
 
     /**
@@ -45,7 +71,13 @@ class TransactionController extends Controller
      */
     public function edit(Transaction $transaction)
     {
-        //
+        $wallets = Wallet::all();
+        $allocations = Allocation::all();
+        return Inertia::render('transactions/edit', [
+            'transaction' => $transaction,
+            'allocations' => $allocations,
+            'wallets' => $wallets,
+        ]);
     }
 
     /**
@@ -53,7 +85,8 @@ class TransactionController extends Controller
      */
     public function update(UpdateTransactionRequest $request, Transaction $transaction)
     {
-        //
+        $transaction->update($request->validated());
+        return to_route('transactions.index')->with('message', 'Transacción actualizada correctamente');
     }
 
     /**
@@ -61,6 +94,7 @@ class TransactionController extends Controller
      */
     public function destroy(Transaction $transaction)
     {
-        //
+        $transaction->delete();
+        return to_route('transactions.index')->with('message', 'Transacción eliminada correctamente');
     }
 }

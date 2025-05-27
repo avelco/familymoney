@@ -35,7 +35,7 @@ export const Summary = ({ totalAllocated, allocations, totalSpent }: any) => {
                 </CardHeader>
                 <CardContent>
                     <div className="text-2xl font-bold">{formatCurrency(totalSpent)}</div>
-                    <Progress value={totalSpent} className="mt-2" />
+                    <Progress value={totalSpent / totalAllocated * 100} className="mt-2" />
                 </CardContent>
             </Card>
         </div>
