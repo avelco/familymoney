@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreBudgetRequest;
 use App\Http\Requests\UpdateBudgetRequest;
 use App\Models\Budget;
+use Inertia\Inertia;
 
 class BudgetController extends Controller
 {
@@ -13,7 +14,10 @@ class BudgetController extends Controller
      */
     public function index()
     {
-        //
+        $budgets = Budget::all();
+        return Inertia::render('budgets/index', [
+            'budgets' => $budgets
+        ]);
     }
 
     /**
@@ -21,7 +25,10 @@ class BudgetController extends Controller
      */
     public function create()
     {
-        //
+        $budgets = Budget::all();
+        return Inertia::render('budgets/create', [
+            'budgets' => $budgets
+        ]);
     }
 
     /**
@@ -29,7 +36,8 @@ class BudgetController extends Controller
      */
     public function store(StoreBudgetRequest $request)
     {
-        //
+        $budget = Budget::create($request->validated());
+        return redirect()->route('budgets.index');
     }
 
     /**
@@ -37,7 +45,9 @@ class BudgetController extends Controller
      */
     public function show(Budget $budget)
     {
-        //
+        return Inertia::render('budgets/show', [
+            'budget' => $budget
+        ]);
     }
 
     /**
@@ -45,7 +55,9 @@ class BudgetController extends Controller
      */
     public function edit(Budget $budget)
     {
-        //
+        return Inertia::render('budgets/edit', [
+            'budget' => $budget
+        ]);
     }
 
     /**
@@ -53,7 +65,8 @@ class BudgetController extends Controller
      */
     public function update(UpdateBudgetRequest $request, Budget $budget)
     {
-        //
+        $budget->update($request->validated());
+        return redirect()->route('budgets.index');
     }
 
     /**
@@ -61,6 +74,7 @@ class BudgetController extends Controller
      */
     public function destroy(Budget $budget)
     {
-        //
+        $budget->delete();
+        return redirect()->route('budgets.index');
     }
 }

@@ -13,6 +13,13 @@ return new class extends Migration
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
+            $table->decimal('amount', 15, 2);
+            $table->string('description');
+            $table->enum('type', ['expense', 'deposit'])->default('expense');
+            $table->dateTime('date')->useCurrent();
+            $table->foreignId('allocation_id')->nullable()->constrained('allocations')->onDelete('set null');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('wallet_id')->constrained('wallets')->onDelete('cascade');
             $table->timestamps();
         });
     }

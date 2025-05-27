@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreWalletRequest;
 use App\Http\Requests\UpdateWalletRequest;
+use App\Models\Transaction;
 use App\Models\Wallet;
+use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 
 class WalletController extends Controller
 {
@@ -13,7 +16,50 @@ class WalletController extends Controller
      */
     public function index()
     {
-        //
+
+        $wallets = Wallet::withSum([
+            'transactions as deposit_total' => function ($query) {
+                $query->where('type', 'deposit');
+            }
+        ], 'amount')
+        ->withSum([
+            'transactions as expense_total' => function ($query) {
+                $query->where('type', 'expense');
+            }
+        ], 'amount')
+        ->get()
+        ->map(function ($wallet) {
+            $wallet->current_balance = ($wallet->deposit_total ?? 0) - ($wallet->expense_total ?? 0);
+            return $wallet;
+        });
+
+        $deposits = Transaction::where('type', 'deposit')->sum('amount');
+        $expenses = Transaction::where('type', 'expense')->sum('amount');
+        $totalBalance = $deposits - $expenses;
+
+        $expensesThisMonth = Transaction::where('type', 'expense')
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->sum('amount');
+
+        $depositsThisMonth = Transaction::where('type', 'deposit')
+        ->whereMonth('created_at', now()->month)
+        ->whereYear('created_at', now()->year)
+        ->sum('amount');
+
+        $lastTransaction = Transaction::where('type', 'expense')
+        ->whereMonth('created_at', now()->month)
+        ->whereYear('created_at', now()->year)
+        ->orderBy('created_at', 'desc')
+        ->first();
+
+        return Inertia::render('wallets/index', [
+            'wallets' => $wallets,
+            'totalBalance' => $totalBalance,
+            'expensesThisMonth' => $expensesThisMonth,
+            'depositsThisMonth' => $depositsThisMonth,
+            'lastTransaction' => $lastTransaction
+        ]);
     }
 
     /**
@@ -21,7 +67,10 @@ class WalletController extends Controller
      */
     public function create()
     {
-        //
+        $wallets = Auth::user()->wallets;
+        return Inertia::render('wallets/create', [
+            'wallets' => $wallets
+        ]);
     }
 
     /**
@@ -29,7 +78,13 @@ class WalletController extends Controller
      */
     public function store(StoreWalletRequest $request)
     {
-        //
+        $wallet = new Wallet();
+        $wallet->name = $request->name;
+        $wallet->currency = $request->currency;
+        $wallet->user_id = Auth::user()->id;
+        $wallet->save();
+
+        return to_route('wallets.index')->with('message', 'Cuenta creada correctamente');
     }
 
     /**
@@ -37,7 +92,9 @@ class WalletController extends Controller
      */
     public function show(Wallet $wallet)
     {
-        //
+        return Inertia::render('wallets/show', [
+            'wallet' => $wallet,
+        ]);
     }
 
     /**
@@ -45,7 +102,9 @@ class WalletController extends Controller
      */
     public function edit(Wallet $wallet)
     {
-        //
+        return Inertia::render('wallets/edit', [
+            'wallet' => $wallet,
+        ]);
     }
 
     /**
@@ -53,7 +112,11 @@ class WalletController extends Controller
      */
     public function update(UpdateWalletRequest $request, Wallet $wallet)
     {
-        //
+        $wallet->name = $request->name;
+        $wallet->currency = $request->currency;
+        $wallet->save();
+
+        return to_route('wallets.index')->with('message', 'Cuenta actualizada correctamente');
     }
 
     /**
@@ -61,6 +124,8 @@ class WalletController extends Controller
      */
     public function destroy(Wallet $wallet)
     {
-        //
+        $wallet->delete();
+
+        return to_route('wallets.index')->with('message', 'Cuenta eliminada correctamente');
     }
 }
