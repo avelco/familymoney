@@ -15,11 +15,12 @@ return new class extends Migration
             $table->id();
             $table->decimal('amount', 15, 2);
             $table->string('description');
-            $table->enum('type', ['expense', 'deposit'])->default('expense');
+            $table->enum('type', ['expense', 'deposit', 'transfer'])->default('expense');
             $table->dateTime('date')->useCurrent();
             $table->foreignId('allocation_id')->nullable()->constrained('allocations')->onDelete('set null');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('wallet_id')->constrained('wallets')->onDelete('cascade');
+            $table->foreignId('wallet_to_id')->nullable()->after('wallet_id')->constrained('wallets')->onDelete('cascade');
             $table->timestamps();
         });
     }

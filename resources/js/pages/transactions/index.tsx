@@ -27,6 +27,7 @@ import {
 import {
     Plus,
     Receipt,
+    Repeat,
     MoreVertical,
     Edit,
     Trash2,
@@ -54,7 +55,7 @@ interface Transaction {
     id: number;
     amount: number;
     description: string;
-    type: 'expense' | 'deposit';
+    type: 'expense' | 'deposit' | 'transfer';
     date: string;
     allocation_id: number | null;
     user_id: number;
@@ -93,6 +94,11 @@ export default function Index({ transactions }: TransactionIndexProps) {
         router.visit('/transactions/create');
     };
 
+    const handleTransfer = () => {
+        router.visit('/transactions/transfer');
+    };
+    
+
     const handleEditTransaction = (transactionId: number) => {
         router.visit(`/transactions/${transactionId}/edit`);
     };
@@ -115,22 +121,27 @@ export default function Index({ transactions }: TransactionIndexProps) {
         });
     };
 
-    const getTransactionIcon = (type: 'expense' | 'deposit') => {
-        return type === 'expense' ? (
-            <ArrowDownCircle className="h-5 w-5 text-red-500" />
-        ) : (
-            <ArrowUpCircle className="h-5 w-5 text-green-500" />
-        );
+    const getTransactionIcon = (type: 'expense' | 'deposit' | 'transfer') => {
+        if (type === 'expense') {
+            return <ArrowDownCircle className="h-5 w-5 text-red-500" />;
+        } else if (type === 'deposit') {
+            return <ArrowUpCircle className="h-5 w-5 text-green-500" />;
+        }
+        return <Repeat className="h-5 w-5 text-blue-500" />;
     };
+        
 
-    const getTransactionBadge = (type: 'expense' | 'deposit') => {
-        return type === 'expense' ? (
-            <Badge variant="destructive">Gasto</Badge>
-        ) : (
-            <Badge variant="default" className="bg-green-100 text-green-800">
-                Ingreso
-            </Badge>
-        );
+    const getTransactionBadge = (type: 'expense' | 'deposit' | 'transfer') => {
+        if (type === 'expense') {
+            return <Badge variant="destructive">Gasto</Badge>;
+        } else if (type === 'deposit') {
+            return (
+                <Badge variant="default" className="bg-green-100 text-green-800">
+                    Ingreso
+                </Badge>
+            );
+        }
+        return <Badge variant="secondary">Transferencia</Badge>;
     };
 
     return (
@@ -151,6 +162,10 @@ export default function Index({ transactions }: TransactionIndexProps) {
                         <Button variant="outline" className="gap-2">
                             <Filter className="h-4 w-4" />
                             Filtrar
+                        </Button>
+                        <Button onClick={handleTransfer} variant="outline" className="gap-2">
+                            <Repeat className="h-4 w-4" />
+                            Transferir
                         </Button>
                         <Button onClick={handleCreateTransaction} className="gap-2">
                             <Plus className="h-4 w-4" />

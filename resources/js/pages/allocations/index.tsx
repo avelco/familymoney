@@ -164,8 +164,7 @@ export default function Show({ budget, allocations, totalAllocated, totalSpent }
 
                         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                             {allocations.map((allocation) => {
-                                const allocationPercentage = allocation.transactions_sum_amount! > 0 ? (allocation.amount / allocation.transactions_sum_amount!) * 100 : 0;
-
+                                const allocationPercentage = allocation.transactions_sum_amount! > 0 ? (allocation.transactions_sum_amount! /allocation.amount) * 100 : 0;
                                 return (
                                     <Card key={allocation.id} className="relative group hover:shadow-md transition-shadow">
                                         <CardHeader className="pb-3">

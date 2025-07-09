@@ -20,6 +20,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { ArrowLeft, Receipt, Save } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 import { BreadcrumbItem } from '@/types';
 import { PageProps } from '@/types/main';
 import { toast } from 'sonner';
@@ -30,6 +31,7 @@ interface Transaction {
     amount: number;
     description: string;
     type: 'expense' | 'deposit';
+    is_transfer: boolean;
     date: string;
     allocation_id: number | null;
     wallet_id: number;
@@ -73,13 +75,22 @@ export default function Edit({
         },
     ];
 
-    const { data, setData, put, processing, errors } = useForm({
+    const { data, setData, put, processing, errors } = useForm<{ 
+        amount: string; 
+        description: string; 
+        type: 'expense' | 'deposit'; 
+        date: string; 
+        allocation_id: string; 
+        wallet_id: string; 
+        is_transfer: boolean; 
+    }>({
         amount: transaction.amount.toString(),
         description: transaction.description,
         type: transaction.type,
         date: new Date(transaction.date).toISOString().slice(0, 16),
         allocation_id: transaction.allocation_id?.toString() || '',
         wallet_id: transaction.wallet_id.toString(),
+        is_transfer: transaction.is_transfer ?? false,
     });
 
     useEffect(() => {
@@ -251,7 +262,17 @@ export default function Edit({
                                 )}
                             </div>
 
-                            {/* Allocation (only for expenses) */}
+                            {/* Transfer Checkbox */}
+                        <div className="flex items-center space-x-2">
+                            <Checkbox
+                                id="is_transfer"
+                                checked={data.is_transfer}
+                                onCheckedChange={(checked) => setData('is_transfer', !!checked)}
+                            />
+                            <Label htmlFor="is_transfer">Marcar como transferencia (no afecta reportes)</Label>
+                        </div>
+
+                        {/* Allocation (only for expenses) */}
                             {data.type === 'expense' && (
                                 <div className="space-y-2">
                                     <Label htmlFor="allocation_id">

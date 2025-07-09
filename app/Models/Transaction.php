@@ -17,12 +17,13 @@ class Transaction extends Model
         'allocation_id',
         'user_id',
         'wallet_id',
+        'wallet_to_id',
     ];
 
     protected $casts = [
         'amount' => 'decimal:2',
         'date' => 'datetime',
-        // If using PHP Enum:
+                // If using PHP Enum:
         // 'type' => TransactionType::class,
     ];
 
@@ -39,5 +40,10 @@ class Transaction extends Model
     public function wallet()
     {
         return $this->belongsTo(Wallet::class);
+    }
+
+    public function walletTo()
+    {
+        return $this->belongsTo(Wallet::class, 'wallet_to_id');
     }
 }

@@ -20,6 +20,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { ArrowLeft, Receipt, Save } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 import { BreadcrumbItem } from '@/types';
 import { PageProps } from '@/types/main';
 import { toast } from 'sonner';
@@ -58,13 +59,22 @@ interface CreateTransactionProps {
 export default function Create({ wallets, allocations }: CreateTransactionProps) {
     const { flash } = usePage<PageProps>().props;
 
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, post, processing, errors } = useForm<{
+        amount: string;
+        description: string;
+        type: 'expense' | 'deposit';
+        date: string;
+        allocation_id: string;
+        wallet_id: string;
+        is_transfer: string;
+    }>({
         amount: '',
         description: '',
         type: 'expense' as 'expense' | 'deposit',
         date: new Date().toISOString().slice(0, 16), // Format for datetime-local input
         allocation_id: '',
         wallet_id: '',
+        is_transfer: '0',
     });
 
     useEffect(() => {
@@ -236,7 +246,7 @@ export default function Create({ wallets, allocations }: CreateTransactionProps)
                                 )}
                             </div>
 
-                            {/* Allocation (only for expenses) */}
+                        {/* Allocation (only for expenses) */}
                             {data.type === 'expense' && (
                                 <div className="space-y-2">
                                     <Label htmlFor="allocation_id">

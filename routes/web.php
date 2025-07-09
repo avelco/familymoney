@@ -26,6 +26,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('wallets', WalletController::class);
     Route::resource('budgets', BudgetController::class);
     Route::resource('budgets.allocations', AllocationController::class);
+    Route::get('transactions/transfer', [TransactionController::class, 'transfer'])->name('transactions.transfer');
+    Route::post('transactions/transfer', [TransactionController::class, 'storeTransfer'])->name('transactions.transfer.store');
     Route::resource('transactions', TransactionController::class);
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');

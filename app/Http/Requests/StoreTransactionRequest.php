@@ -24,7 +24,7 @@ class StoreTransactionRequest extends FormRequest
         return [
             'amount' => 'required|numeric|min:0',
             'description' => 'required|string',
-            'type' => 'required|in:expense,deposit',
+            'type' => 'required|in:expense,deposit,transfer',
             'date' => 'required|date',
             'allocation_id' => 'nullable|exists:allocations,id',
             'wallet_id' => 'required|exists:wallets,id',

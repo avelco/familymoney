@@ -29,13 +29,20 @@ class WalletController extends Controller
         ], 'amount')
         ->get()
         ->map(function ($wallet) {
-            $wallet->current_balance = ($wallet->deposit_total ?? 0) - ($wallet->expense_total ?? 0);
+            $transfers_out = Transaction::where('type', 'transfer')
+                ->where('wallet_id', $wallet->id)
+                ->sum('amount');
+            $transfers_in = Transaction::where('type', 'transfer')
+                ->where('wallet_to_id', $wallet->id)
+                ->sum('amount');
+            $wallet->current_balance = ($wallet->deposit_total ?? 0)
+                + $transfers_in
+                - $transfers_out
+                - ($wallet->expense_total ?? 0);
             return $wallet;
         });
 
-        $deposits = Transaction::where('type', 'deposit')->sum('amount');
-        $expenses = Transaction::where('type', 'expense')->sum('amount');
-        $totalBalance = $deposits - $expenses;
+        $totalBalance = $wallets->sum('current_balance');
 
         $expensesThisMonth = Transaction::where('type', 'expense')
             ->whereMonth('created_at', now()->month)

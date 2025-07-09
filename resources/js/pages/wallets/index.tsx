@@ -66,9 +66,16 @@ export default function Index({ wallets, totalBalance, depositsThisMonth, expens
     };
 
     const handleDeleteWallet = (walletId: number) => {
-        router.visit(`/wallets/${walletId}/delete`, {
-            method: 'delete',
-        });
+        if (confirm('¿Estás seguro de que deseas eliminar esta cuenta? Esta acción no se puede deshacer.')) {
+            router.delete(route('wallets.destroy', walletId), {
+                onSuccess: () => {
+                    toast.success('Cuenta eliminada correctamente.');
+                },
+                onError: () => {
+                    toast.error('Error al eliminar la cuenta.');
+                },
+            });
+        }
     };
 
     return (
@@ -173,13 +180,13 @@ export default function Index({ wallets, totalBalance, depositsThisMonth, expens
                 {wallets.length === 0 && (
                     <Card className="flex flex-col items-center justify-center py-16">
                         <WalletIcon className="h-16 w-16 text-muted-foreground mb-4" />
-                        <h3 className="text-lg font-semibold mb-2">No wallets found</h3>
+                        <h3 className="text-lg font-semibold mb-2">No se encontraron cuentas.</h3>
                         <p className="text-muted-foreground mb-4 text-center max-w-sm">
-                            Get started by creating your first wallet to track your finances
+                            Empieza creando tu primer cuenta o billetera para comenzar a gestionar tus finanzas.
                         </p>
                         <Button onClick={handleCreateWallet} className="gap-2">
                             <Plus className="h-4 w-4" />
-                            Create Your First Wallet
+                            Crear Cuenta
                         </Button>
                     </Card>
                 )}

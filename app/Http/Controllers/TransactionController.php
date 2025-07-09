@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreTransactionRequest;
+use App\Http\Requests\StoreTransferRequest;
 use App\Http\Requests\UpdateTransactionRequest;
 use App\Models\Allocation;
 use App\Models\Transaction;
 use App\Models\Wallet;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class TransactionController extends Controller
@@ -96,5 +98,39 @@ class TransactionController extends Controller
     {
         $transaction->delete();
         return to_route('transactions.index')->with('message', 'Transacción eliminada correctamente');
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function transfer()
+    {
+        $allocations = Allocation::all();
+        $wallets = Wallet::all();
+        return Inertia::render('transactions/transfer', [
+            'allocations' => $allocations,
+            'wallets' => $wallets,
+        ]);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function storeTransfer(StoreTransferRequest $request)
+    {
+        $validated = $request->validated();
+
+        Transaction::create([
+            'amount' => $validated['amount'],
+            'description' => $validated['description'],
+            'type' => 'transfer',
+            'date' => $validated['date'],
+            'allocation_id' => null,
+            'wallet_id' => $validated['wallet_from_id'],
+            'wallet_to_id' => $validated['wallet_to_id'],
+            'user_id' => Auth::id(),
+        ]);
+
+        return to_route('transactions.index')->with('message', 'Transferencia realizada correctamente');
     }
 }
