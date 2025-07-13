@@ -75,14 +75,14 @@ export default function Edit({
         },
     ];
 
-    const { data, setData, put, processing, errors } = useForm<{ 
-        amount: string; 
-        description: string; 
-        type: 'expense' | 'deposit'; 
-        date: string; 
-        allocation_id: string; 
-        wallet_id: string; 
-        is_transfer: boolean; 
+    const { data, setData, put, processing, errors } = useForm<{
+        amount: string;
+        description: string;
+        type: 'expense' | 'deposit';
+        date: string;
+        allocation_id: string;
+        wallet_id: string;
+        is_transfer: boolean;
     }>({
         amount: transaction.amount.toString(),
         description: transaction.description,
@@ -262,16 +262,6 @@ export default function Edit({
                                 )}
                             </div>
 
-                            {/* Transfer Checkbox */}
-                        <div className="flex items-center space-x-2">
-                            <Checkbox
-                                id="is_transfer"
-                                checked={data.is_transfer}
-                                onCheckedChange={(checked) => setData('is_transfer', !!checked)}
-                            />
-                            <Label htmlFor="is_transfer">Marcar como transferencia (no afecta reportes)</Label>
-                        </div>
-
                         {/* Allocation (only for expenses) */}
                             {data.type === 'expense' && (
                                 <div className="space-y-2">
@@ -280,21 +270,22 @@ export default function Edit({
                                     </Label>
                                     <Select
                                         value={data.allocation_id}
-                                        onValueChange={(value) =>
-                                            setData('allocation_id', value)
-                                        }
+                                        onValueChange={(value) => {
+                                             const finalValue = value === 'none' ? '' : value;
+                                             setData('allocation_id', finalValue);
+                                         }}
                                     >
                                         <SelectTrigger>
                                             <SelectValue placeholder="Selecciona una asignación" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="">Sin asignación</SelectItem>
-                                            {filteredAllocations.map((allocation) => (
+                                             <SelectItem value="none">Sin asignación</SelectItem>
+                                            {allocations.map((allocation) => (
                                                 <SelectItem
                                                     key={allocation.id}
                                                     value={allocation.id.toString()}
                                                 >
-                                                    {allocation.name} - {allocation.category.name}
+                                                    {allocation.name}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
