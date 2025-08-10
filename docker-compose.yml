@@ -13,7 +13,7 @@ services:
       - DB_CONNECTION=pgsql
       - DB_HOST=postgres
       - DB_PORT=5432
-      - DB_DATABASE=laravel
+      - DB_DATABASE=familymoney
       - DB_USERNAME=laravel
       - DB_PASSWORD=secret
     networks:
@@ -51,7 +51,7 @@ services:
     container_name: postgres
     # restart: unless-stopped
     environment:
-      POSTGRES_DB: laravel
+      POSTGRES_DB: familymoney
       POSTGRES_USER: laravel
       POSTGRES_PASSWORD: secret
     ports:
