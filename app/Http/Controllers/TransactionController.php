@@ -10,6 +10,7 @@ use App\Models\Transaction;
 use App\Models\Wallet;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class TransactionController extends Controller
@@ -17,15 +18,49 @@ class TransactionController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $transactions = Transaction::with('allocation', 'wallet')
+        $query = Transaction::with('allocation', 'wallet');
+
+        if ($request->filled('type')) {
+            $query->where('type', $request->input('type'));
+        }
+
+        if ($request->filled('wallet_id')) {
+            $query->where('wallet_id', $request->input('wallet_id'));
+        }
+
+        if ($request->filled('allocation_id')) {
+            $query->where('allocation_id', $request->input('allocation_id'));
+        }
+
+        if ($request->filled('search')) {
+            $query->where('description', 'like', '%' . $request->input('search') . '%');
+        }
+
+        if ($request->filled('start_date')) {
+            $query->whereDate('date', '>=', $request->input('start_date'));
+        }
+
+        if ($request->filled('end_date')) {
+            $query->whereDate('date', '<=', $request->input('end_date'));
+        }
+
+        $transactions = $query
             ->latest('created_at')
             ->paginate(10)
             ->withQueryString();
 
+        $filters = $request->only(['search', 'type', 'wallet_id', 'allocation_id', 'start_date', 'end_date']);
+
+        $wallets = Wallet::select('id', 'name')->orderBy('name')->get();
+        $allocations = Allocation::select('id', 'name')->orderBy('name')->get();
+
         return Inertia::render('transactions/index', [
             'transactions' => $transactions,
+            'filters' => $filters,
+            'wallets' => $wallets,
+            'allocations' => $allocations,
         ]);
     }
 

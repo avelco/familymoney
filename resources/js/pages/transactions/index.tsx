@@ -4,11 +4,20 @@ import { Head, router } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import {
     Card,
-    CardContent,
+    CardContent,  
     CardDescription,
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import {
     Table,
     TableBody,
@@ -39,7 +48,7 @@ import {
 import { BreadcrumbItem } from '@/types';
 import { PageProps } from '@/types/main';
 import { toast } from 'sonner';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { formatCurrency } from '@/lib/utils';
 // Summary cards moved to dashboard
 
@@ -94,11 +103,31 @@ interface PaginatedTransactions {
     links: PaginationLink[];
 }
 
-interface TransactionIndexProps {
-    transactions: PaginatedTransactions;
+interface WalletOption {
+    id: number;
+    name: string;
 }
 
-export default function Index({ transactions }: TransactionIndexProps) {
+interface AllocationOption {
+    id: number;
+    name: string;
+}
+
+interface TransactionIndexProps {
+    transactions: PaginatedTransactions;
+    wallets: WalletOption[];
+    allocations: AllocationOption[];
+    filters: {
+        search?: string;
+        type?: 'expense' | 'deposit' | 'transfer';
+        wallet_id?: string | number;
+        allocation_id?: string | number | null;
+        start_date?: string;
+        end_date?: string;
+    };
+}
+
+export default function Index({ transactions, wallets, allocations, filters }: TransactionIndexProps) {
     const { flash } = usePage<PageProps>().props;
 
     useEffect(() => {
@@ -106,6 +135,59 @@ export default function Index({ transactions }: TransactionIndexProps) {
             toast.success(flash.message);
         }
     }, [flash]);
+
+    const [showFilters, setShowFilters] = useState(
+        Boolean(
+            (filters && (
+                filters.search ||
+                filters.type ||
+                filters.wallet_id ||
+                filters.allocation_id ||
+                filters.start_date ||
+                filters.end_date
+            ))
+        )
+    );
+    const [localFilters, setLocalFilters] = useState({
+        search: (filters?.search as string) || '',
+        type: (filters?.type as string) || '',
+        wallet_id: (filters?.wallet_id as string | number | undefined)?.toString?.() || '',
+        allocation_id: (filters?.allocation_id as string | number | null | undefined)?.toString?.() || '',
+        start_date: (filters?.start_date as string) || '',
+        end_date: (filters?.end_date as string) || '',
+    });
+
+    const buildQuery = (f: typeof localFilters) => {
+        return Object.fromEntries(
+            Object.entries(f).filter(([_, v]) => v !== undefined && v !== null && v !== '')
+        );
+    };
+
+    const applyFilters = (e?: React.FormEvent) => {
+        if (e) e.preventDefault();
+        router.get('/transactions', buildQuery(localFilters), {
+            preserveState: true,
+            replace: true,
+            preserveScroll: true,
+        });
+    };
+
+    const resetFilters = () => {
+        const empty = {
+            search: '',
+            type: '',
+            wallet_id: '',
+            allocation_id: '',
+            start_date: '',
+            end_date: '',
+        };
+        setLocalFilters(empty);
+        router.get('/transactions', {}, {
+            preserveState: true,
+            replace: true,
+            preserveScroll: true,
+        });
+    };
 
     const handleCreateTransaction = () => {
         router.visit('/transactions/create');
@@ -176,7 +258,7 @@ export default function Index({ transactions }: TransactionIndexProps) {
                         </p>
                     </div>
                     <div className="flex flex-wrap gap-2 sm:justify-end">
-                        <Button variant="outline" className="gap-2">
+                        <Button variant="outline" className="gap-2" onClick={() => setShowFilters((v) => !v)}>
                             <Filter className="h-4 w-4" />
                             Filtrar
                         </Button>
@@ -197,6 +279,108 @@ export default function Index({ transactions }: TransactionIndexProps) {
                 </div>
 
                 {/* Summary cards moved to Dashboard */}
+
+                {/* Filters */}
+                {showFilters && (
+                    <Card>
+                        <CardContent className="pt-6">
+                            <form onSubmit={applyFilters} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="search">Buscar</Label>
+                                    <Input
+                                        id="search"
+                                        placeholder="Descripción..."
+                                        value={localFilters.search}
+                                        onChange={(e) => setLocalFilters((s) => ({ ...s, search: e.target.value }))}
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="type">Tipo</Label>
+                                    <Select
+                                        value={localFilters.type || 'none'}
+                                        onValueChange={(value) => setLocalFilters((s) => ({ ...s, type: value === 'none' ? '' : value }))}
+                                    >
+                                        <SelectTrigger id="type">
+                                            <SelectValue placeholder="Todos" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="none">Todos</SelectItem>
+                                            <SelectItem value="expense">Gasto</SelectItem>
+                                            <SelectItem value="deposit">Ingreso</SelectItem>
+                                            <SelectItem value="transfer">Transferencia</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="wallet_id">Billetera</Label>
+                                    <Select
+                                        value={localFilters.wallet_id || 'none'}
+                                        onValueChange={(value) => setLocalFilters((s) => ({ ...s, wallet_id: value === 'none' ? '' : value }))}
+                                    >
+                                        <SelectTrigger id="wallet_id">
+                                            <SelectValue placeholder="Todas" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="none">Todas</SelectItem>
+                                            {wallets.map((w) => (
+                                                <SelectItem key={w.id} value={w.id.toString()}>
+                                                    {w.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="allocation_id">Asignación</Label>
+                                    <Select
+                                        value={localFilters.allocation_id || 'none'}
+                                        onValueChange={(value) => setLocalFilters((s) => ({ ...s, allocation_id: value === 'none' ? '' : value }))}
+                                    >
+                                        <SelectTrigger id="allocation_id">
+                                            <SelectValue placeholder="Todas" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="none">Todas</SelectItem>
+                                            {allocations.map((a) => (
+                                                <SelectItem key={a.id} value={a.id.toString()}>
+                                                    {a.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="start_date">Desde</Label>
+                                    <Input
+                                        id="start_date"
+                                        type="date"
+                                        value={localFilters.start_date}
+                                        onChange={(e) => setLocalFilters((s) => ({ ...s, start_date: e.target.value }))}
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="end_date">Hasta</Label>
+                                    <Input
+                                        id="end_date"
+                                        type="date"
+                                        value={localFilters.end_date}
+                                        onChange={(e) => setLocalFilters((s) => ({ ...s, end_date: e.target.value }))}
+                                    />
+                                </div>
+
+                                <div className="flex items-end gap-2 md:col-span-2 lg:col-span-3">
+                                    <Button type="submit" className="gap-2">Aplicar</Button>
+                                    <Button type="button" variant="outline" onClick={resetFilters}>Limpiar</Button>
+                                </div>
+                            </form>
+                        </CardContent>
+                    </Card>
+                )}
 
                 {/* Transactions Table */}
                 {transactions.data.length > 0 && (

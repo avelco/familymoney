@@ -4,9 +4,9 @@ use App\Http\Controllers\AllocationController;
 use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\TransactionController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 use App\Http\Controllers\WalletController;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\DashboardController;
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -19,17 +19,7 @@ Route::get('/', function () {
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', function () {
-        $start = \Carbon\Carbon::now()->startOfMonth();
-        $end = \Carbon\Carbon::now()->endOfMonth();
-        $transactions = \App\Models\Transaction::where('user_id', Auth::id())
-            ->whereBetween('date', [$start, $end])
-            ->get();
-
-        return Inertia::render('dashboard', [
-            'transactions' => $transactions,
-        ]);
-    })->name('dashboard');
+    Route::get('dashboard', [DashboardController::class, '__invoke'])->name('dashboard');
 
     Route::resource('wallets', WalletController::class);
     Route::resource('budgets', BudgetController::class);
