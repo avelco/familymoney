@@ -41,7 +41,7 @@ import { PageProps } from '@/types/main';
 import { toast } from 'sonner';
 import { useEffect } from 'react';
 import { formatCurrency } from '@/lib/utils';
-import { Summary } from './components/summary';
+// Summary cards moved to dashboard
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -77,8 +77,25 @@ interface Transaction {
     };
 }
 
+interface PaginationLink {
+    url: string | null;
+    label: string;
+    active: boolean;
+}
+
+interface PaginatedTransactions {
+    data: Transaction[];
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+    from: number | null;
+    to: number | null;
+    links: PaginationLink[];
+}
+
 interface TransactionIndexProps {
-    transactions: Transaction[];
+    transactions: PaginatedTransactions;
 }
 
 export default function Index({ transactions }: TransactionIndexProps) {
@@ -147,9 +164,9 @@ export default function Index({ transactions }: TransactionIndexProps) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Transacciones" />
-            <div className="flex h-full flex-1 flex-col gap-6 rounded-xl p-6">
+            <div className="w-full min-w-0 overflow-x-hidden flex h-full flex-1 flex-col gap-6 rounded-xl p-6">
                 {/* Header Section */}
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight">
                             Transacciones
@@ -158,7 +175,7 @@ export default function Index({ transactions }: TransactionIndexProps) {
                             Administra todos tus ingresos y gastos
                         </p>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2 sm:justify-end">
                         <Button variant="outline" className="gap-2">
                             <Filter className="h-4 w-4" />
                             Filtrar
@@ -167,32 +184,35 @@ export default function Index({ transactions }: TransactionIndexProps) {
                             <Repeat className="h-4 w-4" />
                             Transferir
                         </Button>
-                        <Button onClick={handleCreateTransaction} className="gap-2">
+                        <Button
+                            onClick={handleCreateTransaction}
+                            aria-label="Nueva Transacción"
+                            title="Nueva Transacción"
+                            className="gap-1 sm:gap-2 whitespace-nowrap"
+                        >
                             <Plus className="h-4 w-4" />
-                            Nueva Transacción
+                            <span className="hidden sm:inline">Nueva Transacción</span>
                         </Button>
                     </div>
                 </div>
 
-                {/* Summary Cards */}
-                {transactions.length > 0 && (
-                    <Summary transactions={transactions} />
-                )}
+                {/* Summary cards moved to Dashboard */}
 
                 {/* Transactions Table */}
-                {transactions.length > 0 && (
+                {transactions.data.length > 0 && (
                     <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <Receipt className="h-5 w-5" />
-                                Transacciones ({transactions.length})
+                                Transacciones ({transactions.total})
                             </CardTitle>
                             <CardDescription>
                                 Historial completo de todas tus transacciones
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <Table>
+                            <div className="w-full overflow-x-auto">
+                            <Table className="min-w-[720px]">
                                 <TableHeader>
                                     <TableRow>
                                         <TableHead>Descripción</TableHead>
@@ -207,7 +227,7 @@ export default function Index({ transactions }: TransactionIndexProps) {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {transactions.map((transaction) => (
+                                    {transactions.data.map((transaction) => (
                                         <TableRow key={transaction.id}>
                                             <TableCell className="font-medium">
                                                 <div className="flex items-center gap-3">
@@ -325,12 +345,29 @@ export default function Index({ transactions }: TransactionIndexProps) {
                                     ))}
                                 </TableBody>
                             </Table>
+                            </div>
+                            {/* Pagination */}
+                            {transactions.links && transactions.links.length > 0 && (
+                                <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+                                    {transactions.links.map((link, idx) => (
+                                        <Button
+                                            key={idx}
+                                            variant={link.active ? 'default' : 'outline'}
+                                            size="sm"
+                                            disabled={!link.url}
+                                            onClick={() => link.url && router.visit(link.url)}
+                                        >
+                                            <span dangerouslySetInnerHTML={{ __html: link.label }} />
+                                        </Button>
+                                    ))}
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
                 )}
 
                 {/* Empty State */}
-                {transactions.length === 0 && (
+                {transactions.data.length === 0 && (
                     <Card className="flex flex-col items-center justify-center py-16">
                         <Receipt className="h-16 w-16 text-muted-foreground mb-4" />
                         <h3 className="text-lg font-semibold mb-2">

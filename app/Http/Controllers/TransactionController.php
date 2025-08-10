@@ -21,7 +21,8 @@ class TransactionController extends Controller
     {
         $transactions = Transaction::with('allocation', 'wallet')
             ->latest('created_at')
-            ->get();
+            ->paginate(10)
+            ->withQueryString();
 
         return Inertia::render('transactions/index', [
             'transactions' => $transactions,
@@ -33,7 +34,7 @@ class TransactionController extends Controller
      */
     public function create()
     {
-        $allocations = Allocation::all();
+        $allocations = Allocation::with('budget')->get();
         $wallets = Wallet::all();
         return Inertia::render('transactions/create', [
             'allocations' => $allocations,

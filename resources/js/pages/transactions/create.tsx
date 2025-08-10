@@ -45,9 +45,10 @@ interface Wallet {
 interface Allocation {
     id: number;
     name: string;
-    category: {
+    budget?: {
         id: number;
-        name: string;
+        start_date: string;
+        end_date: string;
     };
 }
 
@@ -71,7 +72,7 @@ export default function Create({ wallets, allocations }: CreateTransactionProps)
         amount: '',
         description: '',
         type: 'expense' as 'expense' | 'deposit',
-        date: new Date().toISOString().slice(0, 16), // Format for datetime-local input
+        date: new Date().toLocaleDateString('en-CA'), // YYYY-MM-DD for date input
         allocation_id: '',
         wallet_id: '',
         is_transfer: '0',
@@ -100,16 +101,24 @@ export default function Create({ wallets, allocations }: CreateTransactionProps)
         router.visit('/transactions');
     };
 
-    const filteredAllocations = allocations.filter(allocation =>
-        data.type === 'expense' // Only show allocations for expenses
-    );
+    const selectedDate = new Date(`${data.date}T00:00:00`);
+    const filteredAllocations =
+        data.type === 'expense'
+            ? allocations.filter((allocation) => {
+                  if (!allocation.budget) return false;
+                  const start = new Date(allocation.budget.start_date);
+                  const end = new Date(allocation.budget.end_date);
+                  // Include allocation if selected date falls within its budget period
+                  return selectedDate >= start && selectedDate <= end;
+              })
+            : [];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Crear Transacción" />
-            <div className="flex h-full flex-1 flex-col gap-6 rounded-xl p-6">
+            <div className="w-full min-w-0 overflow-x-hidden flex h-full flex-1 flex-col gap-6 rounded-xl p-6">
                 {/* Header Section */}
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 min-w-0">
                     <Button
                         variant="outline"
                         size="icon"
@@ -118,7 +127,7 @@ export default function Create({ wallets, allocations }: CreateTransactionProps)
                     >
                         <ArrowLeft className="h-4 w-4" />
                     </Button>
-                    <div>
+                    <div className="min-w-0">
                         <h1 className="text-3xl font-bold tracking-tight">
                             Crear Transacción
                         </h1>
@@ -205,10 +214,10 @@ export default function Create({ wallets, allocations }: CreateTransactionProps)
 
                             {/* Date */}
                             <div className="space-y-2">
-                                <Label htmlFor="date">Fecha y Hora</Label>
+                                <Label htmlFor="date">Fecha</Label>
                                 <Input
                                     id="date"
-                                    type="datetime-local"
+                                    type="date"
                                     value={data.date}
                                     onChange={(e) => setData('date', e.target.value)}
                                     className={errors.date ? 'border-red-500' : ''}
@@ -252,12 +261,13 @@ export default function Create({ wallets, allocations }: CreateTransactionProps)
                                     <Label htmlFor="allocation_id">
                                         Asignación (Opcional)
                                     </Label>
-                                    <Select
+                                     <Select
                                         value={data.allocation_id}
-                                        onValueChange={(value) =>
-                                            setData('allocation_id', value)
-                                        }
-                                    >
+                                        onValueChange={(value) => {
+                                            const finalValue = value === 'none' ? '' : value;
+                                            setData('allocation_id', finalValue);
+                                        }}
+                                     >
                                         <SelectTrigger>
                                             <SelectValue placeholder="Selecciona una asignación" />
                                         </SelectTrigger>

@@ -20,7 +20,15 @@ Route::get('/', function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
+        $start = \Carbon\Carbon::now()->startOfMonth();
+        $end = \Carbon\Carbon::now()->endOfMonth();
+        $transactions = \App\Models\Transaction::where('user_id', Auth::id())
+            ->whereBetween('date', [$start, $end])
+            ->get();
+
+        return Inertia::render('dashboard', [
+            'transactions' => $transactions,
+        ]);
     })->name('dashboard');
 
     Route::resource('wallets', WalletController::class);
@@ -29,9 +37,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('transactions/transfer', [TransactionController::class, 'transfer'])->name('transactions.transfer');
     Route::post('transactions/transfer', [TransactionController::class, 'storeTransfer'])->name('transactions.transfer.store');
     Route::resource('transactions', TransactionController::class);
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
+    // Duplicate dashboard route removed; the dashboard route above passes current-month transactions.
 });
 
 require __DIR__ . '/settings.php';

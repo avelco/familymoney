@@ -8,43 +8,19 @@ import {
   CardTitle,
   CardDescription,
 } from '@/components/ui/card';
-import { formatCurrency } from '@/lib/utils';
+import { Transaction } from '@/types/transactions';
+import { Summary } from '@/pages/transactions/components/summary';
 
 const breadcrumbs: BreadcrumbItem[] = [
   { title: 'Reportes', href: '/reports' },
 ];
 
-export default function Index() {
+export default function Index({ transactions }: { transactions: Transaction[] }) {
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Reportes" />
       <div className="flex flex-col gap-6 p-6">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Total Ingresos</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{formatCurrency(0)}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Total Gastos</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{formatCurrency(0)}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Balance</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{formatCurrency(0)}</div>
-            </CardContent>
-          </Card>
-        </div>
+        <Summary transactions={transactions} />
 
         <Card className="mt-6">
           <CardHeader>
